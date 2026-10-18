@@ -22,7 +22,7 @@ async function main() {
     console.log('\n✅ Database connected successfully!');
 
     app.listen(process.env.PORT, () => {
-      console.log(`🚀 App server (${process.env.NODE_ENV}) is running on http://localhost:${process.env.PORT}`);
+      console.log(`🚀 App server (${process.env.NODE_ENV}) is running on port: ${process.env.PORT}`);
     });
   } catch (error) {
     console.error('❌ Database connection failed:', error);
