@@ -1,4 +1,4 @@
-import { bigint, boolean, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, pgTable, timestamp, uuid, varchar, text } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -7,23 +7,14 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull(),
   emailVerified: boolean("email_verified").notNull().default(false),
   password: varchar("password", { length: 255 }),
-
-  role: varchar("role", { length: 2 })
-    .notNull()
-    .default("2"), // Admin: '1', User: '2'
-
+  role: varchar("role", { length: 2 }).notNull().default("2"), // Admin: '1', User: '2'
   provider: varchar("provider", { length: 255 }).notNull().default("email"), // 'email', 'google', 'github', etc.
-  providerToken: varchar("provider_token", { length: 255 }), // Token from the provider
-  is_active: boolean("is_active").notNull().default(true),
-
-  image: varchar("image", { length: 255 }), // URL to the user's profile image
-  storageUsed: bigint("storage_used", { mode: "number" })
-    .notNull()
-    .default(0),
-
-  storageLimit: bigint("storage_limit", { mode: "number" })
-    .notNull()
-    .default(1073741824), // 1 GB (Free Tier)
+  providerId: varchar("provider_id", { length: 255 }), // ID from the provider
+  providerToken: text("provider_token"), // Token from the provider
+  isActive: boolean("is_active").notNull().default(true),
+  picture: varchar("picture", { length: 255 }), // URL to the user's profile image
+  storageUsed: bigint("storage_used", { mode: "number" }).notNull().default(0),
+  storageLimit: bigint("storage_limit", { mode: "number" }).notNull().default(16106127360), // 15 GB (Free Tier)
 
   createdAt: timestamp("created_at", {
     withTimezone: true,
@@ -31,7 +22,7 @@ export const users = pgTable("users", {
   })
     .notNull()
     .defaultNow(),
-
+  
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "date",

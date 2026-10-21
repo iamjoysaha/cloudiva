@@ -2,18 +2,22 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import db from './db/db_init.js';
 import dotenv from 'dotenv';
+import publicRoutes from './routes/public.route.js';
+import path from 'path';
 
 dotenv.config();
 const app = express();
 
 app.disable('x-powered-by');
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.set('views', path.join(process.cwd(), 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use('/', publicRoutes);
+
 app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to Cloud Storage App!');
+  res.send('Welcome to Cloudiva Server!');
 });
 
 async function main() {
