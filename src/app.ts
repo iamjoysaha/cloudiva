@@ -2,7 +2,7 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import db from './db/db_init.js';
 import dotenv from 'dotenv';
-import publicRoutes from './routes/public.route.js';
+import { pageRoutes, publicRoutes } from './routes/index.js';
 import path from 'path';
 
 dotenv.config();
@@ -14,6 +14,7 @@ app.set('views', path.join(process.cwd(), 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use('/', pageRoutes);
 app.use('/', publicRoutes);
 
 app.get('/', (req: Request, res: Response) => {

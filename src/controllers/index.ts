@@ -1,3 +1,3 @@
-import { register } from "./public.controller.js";
+import { register, login } from "./public.controller.js";
 
-export { register };
+export { register, login };

@@ -7,10 +7,10 @@ const registerPayload = z.object({
   last_name: z.string().optional(),
   email: z.email({
     message: "Invalid email address",
-  }).optional(),
+  }).trim().toLowerCase().optional(),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters long",
-  }).optional(),
+  }).trim().optional(),
   picture: z.string().nullish(),
   provider: z.string().min(1, {
     message: "Provider is required",
@@ -18,4 +18,17 @@ const registerPayload = z.object({
   provider_token: z.string().nullish(),
 });
 
-export { registerPayload };
+const loginPayload = z.object({
+  email: z.email({
+    message: "Invalid email address",
+  }).trim().toLowerCase().optional(),
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters long",
+  }).trim().optional(),
+  provider: z.string().min(1, {
+    message: "Provider is required",
+  }).default("email"),
+  provider_token: z.string().nullish()
+});
+
+export { registerPayload, loginPayload };
