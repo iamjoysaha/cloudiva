@@ -37,12 +37,7 @@ export const files = pgTable("files", {
         mode: "date",
     })
         .notNull()
-        .defaultNow(),
-
-    deletedAt: timestamp("deleted_at", {
-        withTimezone: true,
-        mode: "date",
-    })
+        .defaultNow()
 },
     (table) => [
         index("idx_files_owner_folder").on(

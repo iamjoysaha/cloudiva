@@ -15,7 +15,7 @@ export const shareLinks = pgTable("share_links", {
 
     permission: varchar("permission", { length: 255 })
         .notNull()
-        .default("download"),
+        .default("download"), // 'download' | 'view' | 'edit'
 
     expiresAt: timestamp("expires_at", {
         withTimezone: true,

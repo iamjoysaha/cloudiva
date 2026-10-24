@@ -30,12 +30,7 @@ export const folders = pgTable("folders", {
     mode: "date",
   })
     .notNull()
-    .defaultNow(),
-
-  deletedAt: timestamp("deleted_at", {
-    withTimezone: true,
-    mode: "date",
-  })
+    .defaultNow()
 },
   (table) => [
     index("idx_folders_owner_parent").on(
