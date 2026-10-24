@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create your account | Cloudiva</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #fff;
+        --ink: #0f1633;
+        --mut: #5d6585;
+        --line: #e3e6f0;
+        --acc: #4f5bff;
+        --accd: #3d48e0;
+        --soft: #eef0ff;
+        --sh:
+          0 1px 2px rgba(15, 22, 51, 0.05),
+          0 6px 16px -8px rgba(15, 22, 51, 0.1);
+        box-sizing: border-box;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.5 Inter,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .announcement {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 42px 9px 16px;
+        background: var(--ink);
+        color: #fff;
+        text-align: center;
+        font-size: 13px;
+      }
+      .announcement strong {
+        color: #aab0ff;
+      }
+      .announcement-close {
+        position: absolute;
+        right: 14px;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        opacity: 0.75;
+        font-size: 17px;
+      }
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 40px;
+        border-bottom: 1px solid var(--line);
+        background: var(--card);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .brand-mark {
+        display: block;
+        width: 30px;
+        height: 30px;
+        border-radius: 9px 9px 9px 2px;
+        background: var(--acc);
+      }
+      .brand img {
+        display: block;
+        height: 30px;
+        width: auto;
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-link,
+      .nav-button {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .nav-link {
+        background: transparent;
+        color: var(--ink);
+      }
+      .nav-link:hover {
+        background: var(--soft);
+      }
+      .nav-button {
+        background: var(--acc);
+        color: #fff;
+      }
+      .nav-button:hover {
+        background: var(--accd);
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: calc(100vh - 98px);
+        background: var(--card);
+      }
+      .form-wrap {
+        display: grid;
+        place-items: center;
+        padding: 48px 40px;
+      }
+      .form {
+        width: 100%;
+        max-width: 400px;
+      }
+      .form h1 {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.8px;
+      }
+      .subtitle {
+        margin: 6px 0 22px;
+        color: var(--mut);
+      }
+      .google-button {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        min-height: 44px;
+      }
+      .google-button > div {
+        max-width: 100%;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        color: var(--mut);
+        font-size: 13px;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .field label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--mut);
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .optional {
+        color: #858ba4;
+        font-weight: 400;
+      }
+      .field input {
+        width: 100%;
+        min-width: 0;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        outline: 0;
+        background: var(--card);
+        color: var(--ink);
+      }
+      .field input::placeholder {
+        color: #969bb0;
+      }
+      .field input:focus {
+        border-color: var(--acc);
+        box-shadow: 0 0 0 3px rgba(79, 91, 255, 0.18);
+      }
+
+      /* Password toggle */
+      .password-wrapper {
+        position: relative;
+      }
+      .password-wrapper input {
+        padding-right: 44px;
+      }
+      .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--mut);
+        padding: 0;
+      }
+      .toggle-password:hover {
+        background: var(--soft);
+        color: var(--ink);
+      }
+      .toggle-password svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
+      .toggle-password .icon-hide {
+        display: none;
+      }
+      .toggle-password.is-visible .icon-show {
+        display: none;
+      }
+      .toggle-password.is-visible .icon-hide {
+        display: block;
+      }
+
+      .primary-button {
+        width: 100%;
+        margin-top: 6px;
+        padding: 13px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--acc);
+        color: #fff;
+        font-weight: 700;
+      }
+      .primary-button:hover {
+        background: var(--accd);
+      }
+      .primary-button:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+      #status {
+        min-height: 18px;
+        margin: 12px 0 0;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+      #status.error {
+        color: #d94b4b;
+      }
+      #status.success {
+        color: #168653;
+      }
+      .switch {
+        margin: 18px 0 0;
+        color: var(--mut);
+        text-align: center;
+      }
+      .switch a {
+        color: var(--acc);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .secure-note {
+        margin-top: 22px;
+        color: var(--mut);
+        text-align: center;
+        font-size: 12px;
+      }
+      .hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 24px;
+        padding: 56px;
+        background: var(--soft);
+        color: var(--ink);
+      }
+      .hero h2 {
+        max-width: 440px;
+        margin: 0;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -1px;
+      }
+      .hero h2 em {
+        color: var(--acc);
+        font-style: normal;
+      }
+      .hero-copy {
+        max-width: 340px;
+        margin: 10px 0 0;
+        color: var(--mut);
+      }
+      .mock {
+        width: 100%;
+        max-width: 440px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--card);
+        box-shadow: var(--sh);
+      }
+      .mock-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .mock-row:hover {
+        background: var(--bg);
+      }
+      .file-icon {
+        display: grid;
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--soft);
+        font-size: 18px;
+      }
+      .file-info {
+        flex: 1;
+        min-width: 0;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .file-info small {
+        display: block;
+        color: var(--mut);
+        font-size: 12px;
+        font-weight: 400;
+      }
+      .synced {
+        padding: 3px 9px;
+        border-radius: 99px;
+        background: #e3f6ec;
+        color: #1a8f5b;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .testimonial {
+        max-width: 440px;
+        color: var(--mut);
+        font-size: 14px;
+      }
+      .testimonial strong {
+        display: block;
+        margin-top: 8px;
+        color: var(--ink);
+      }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .facts span::before {
+        content: "✓ ";
+        color: var(--acc);
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 36px;
+        }
+        .form-wrap {
+          padding: 36px 28px;
+        }
+      }
+      @media (max-width: 760px) {
+        .navbar {
+          padding: 12px 18px;
+        }
+        .nav-actions .nav-link {
+          display: none;
+        }
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .form-wrap {
+          padding: 36px 22px;
+        }
+        .hero {
+          display: none;
+        }
+      }
+      @media (max-width: 420px) {
+        .field-row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+        .announcement {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="auth">
+      <div class="announcement" id="announcement">
+        🎉 Hey, shared drives are here! Collaborate with your whole team.
+        <strong>Read more →</strong>
+        <button
+          class="announcement-close"
+          type="button"
+          aria-label="Dismiss announcement"
+          onclick="document.getElementById('announcement').remove()"
+        >
+          ×
+        </button>
+      </div>
+      <nav class="navbar" aria-label="Main navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>Cloudiva
+        </div>
+        <div class="nav-actions">
+          <a class="nav-link" href="/login">Log in</a>
+          <span class="nav-button">Try for free</span>
+        </div>
+      </nav>
+      <div class="split">
+        <div class="form-wrap">
+          <main class="form">
+            <h1>Create your account</h1>
+            <p class="subtitle">Get 15 GB free. No card needed.</p>
+
+            <!-- Google: no form fields required -->
+            <div id="google-button" class="google-button">
+              <div
+                id="g_id_onload"
+                data-client_id="<%= googleClientId %>"
+                data-callback="handleGoogleSignIn"
+                data-auto_prompt="false"
+              ></div>
+              <div
+                class="g_id_signin"
+                data-type="standard"
+                data-size="large"
+                data-theme="outline"
+                data-text="signup_with"
+                data-shape="rectangular"
+                data-logo_alignment="left"
+                data-width="320"
+              ></div>
+            </div>
+
+            <div class="divider">or continue with email</div>
+
+            <form id="register-form" novalidate>
+              <div class="field-row">
+                <div class="field">
+                  <label for="firstName"
+                    >First name <span aria-hidden="true">*</span></label
+                  >
+                  <input
+                    id="firstName"
+                    name="first_name"
+                    type="text"
+                    placeholder="Ada"
+                    autocomplete="given-name"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="lastName"
+                    >Last name <span class="optional">(optional)</span></label
+                  >
+                  <input
+                    id="lastName"
+                    name="last_name"
+                    type="text"
+                    placeholder="Lovelace"
+                    autocomplete="family-name"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label for="email"
+                  >Email <span aria-hidden="true">*</span></label
+                >
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="ada.lovelace@example.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="password"
+                  >Password <span aria-hidden="true">*</span></label
+                >
+                <div class="password-wrapper">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    autocomplete="new-password"
+                    required
+                    minlength="8"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    id="toggle-password"
+                    aria-label="Show password"
+                    aria-pressed="false"
+                  >
+                    <!-- Eye (show) -->
+                    <svg
+                      class="icon-show"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <!-- Eye-off (hide) -->
+                    <svg
+                      class="icon-hide"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="primary-button" id="register-btn">
+                Create account
+              </button>
+            </form>
+
+            <p id="status" role="status" aria-live="polite"></p>
+            <p class="switch">
+              Already have an account? <a href="/login">Log in</a>
+            </p>
+            <p class="secure-note">Secure authentication powered by Google</p>
+          </main>
+        </div>
+        <aside class="hero">
+          <div>
+            <h2>Team-friendly cloud storage for <em>modern projects</em></h2>
+            <p class="hero-copy">
+              Store, organise and share files in minutes. Sync across every
+              device.
+            </p>
+          </div>
+          <div class="mock" aria-label="Example of synced files">
+            <div class="mock-row">
+              <span class="file-icon" aria-hidden="true">📕</span>
+              <div class="file-info">
+                Brand Guidelines.pdf<small>Website Redesign · 4.2 MB</small>
+              </div>
+              <span class="synced">Synced</span>
+            </div>
+            <div class="mock-row">
+              <span class="file-icon" aria-hidden="true">🖼️</span>
+              <div class="file-info">
+                Hero Mockup.png<small>Shared with 3 people</small>
+              </div>
+              <span class="synced">Synced</span>
+            </div>
+            <div class="mock-row">
+              <span class="file-icon" aria-hidden="true">📊</span>
+              <div class="file-info">
+                Q3 Budget.xlsx<small>Finance Q3 · 1.1 MB</small>
+              </div>
+              <span class="synced">Synced</span>
+            </div>
+          </div>
+          <div class="testimonial">
+            “We moved every project into Cloudiva in a day. Sharing with clients
+            is finally painless.”
+            <strong>Joy Saha · Creator of Cloudiva</strong>
+          </div>
+          <div class="facts">
+            <span>15 GB free</span>
+            <span>End-to-end encrypted</span>
+            <span>24/7 support</span>
+            <span>99.9% uptime</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+    <script>
+      const statusEl = document.getElementById("status");
+      const form = document.getElementById("register-form");
+      const registerBtn = document.getElementById("register-btn");
+      const firstNameInput = document.getElementById("firstName");
+      const lastNameInput = document.getElementById("lastName");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const togglePasswordBtn = document.getElementById("toggle-password");
+
+      function setStatus(message, type = "") {
+        statusEl.className = type;
+        statusEl.textContent = message;
+      }
+
+      function getFormValues() {
+        return {
+          first_name: firstNameInput.value.trim(),
+          last_name: lastNameInput.value.trim(),
+          email: emailInput.value.trim(),
+          password: passwordInput.value,
+        };
+      }
+
+      function validateForm() {
+        const { first_name, email, password } = getFormValues();
+
+        if (!first_name) {
+          setStatus("Please enter your first name.", "error");
+          firstNameInput.focus();
+          return false;
+        }
+        if (!email) {
+          setStatus("Please enter your email.", "error");
+          emailInput.focus();
+          return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          setStatus("Please enter a valid email address.", "error");
+          emailInput.focus();
+          return false;
+        }
+        if (!password || password.length < 8) {
+          setStatus("Password must be at least 8 characters.", "error");
+          passwordInput.focus();
+          return false;
+        }
+        return true;
+      }
+
+      async function postRegister(payload) {
+        const apiResponse = await fetch("http://localhost:3000/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await apiResponse.json();
+        if (!apiResponse.ok || !result.success) {
+          throw new Error(
+            result.message || "Registration failed. Please try again.",
+          );
+        }
+        return result;
+      }
+
+      // Password show / hide
+      togglePasswordBtn.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+        passwordInput.type = isHidden ? "text" : "password";
+        togglePasswordBtn.classList.toggle("is-visible", isHidden);
+        togglePasswordBtn.setAttribute(
+          "aria-label",
+          isHidden ? "Hide password" : "Show password",
+        );
+        togglePasswordBtn.setAttribute("aria-pressed", String(isHidden));
+      });
+
+      // Email / password registration
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStatus("");
+
+        if (!validateForm()) return;
+
+        const values = getFormValues();
+        registerBtn.disabled = true;
+        setStatus("Creating your account...");
+
+        try {
+          const payload = {
+            provider: "email",
+            first_name: values.first_name,
+            email: values.email,
+            password: values.password,
+          };
+          if (values.last_name) {
+            payload.last_name = values.last_name;
+          }
+
+          const result = await postRegister(payload);
+          setStatus("Registration successful!", "success");
+          console.log("Registered user:", result.data);
+          // window.location.href = "/dashboard";
+        } catch (error) {
+          console.error("Registration error:", error);
+          setStatus(
+            error instanceof Error
+              ? error.message
+              : "Something went wrong. Please try again.",
+            "error",
+          );
+        } finally {
+          registerBtn.disabled = false;
+        }
+      });
+
+      // Google sign-in
+      async function handleGoogleSignIn(response) {
+        setStatus("");
+
+        if (!response || !response.credential) {
+          setStatus(
+            "Google did not return an ID token. Please try again.",
+            "error",
+          );
+          return;
+        }
+
+        setStatus("Registering your account...");
+
+        try {
+          const result = await postRegister({
+            provider: "google",
+            provider_token: response.credential,
+          });
+          setStatus("Registration successful!", "success");
+          console.log("Registered user:", result.data);
+          // window.location.href = "/dashboard";
+        } catch (error) {
+          console.error("Google registration error:", error);
+          setStatus(
+            error instanceof Error
+              ? error.message
+              : "Something went wrong. Please try again.",
+            "error",
+          );
+        }
+      }
+
+      window.handleGoogleSignIn = handleGoogleSignIn;
+    </script>
+  </body>
+</html>
