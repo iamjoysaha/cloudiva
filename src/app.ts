@@ -2,8 +2,9 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import db from './db/db_init.js';
 import dotenv from 'dotenv';
-import { pageRoutes, publicRoutes } from './routes/index.js';
+import { pageRoutes, publicRoutes, userRoutes } from './routes/index.js';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
@@ -13,9 +14,11 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/', pageRoutes);
 app.use('/', publicRoutes);
+app.use('/user', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to Cloudiva Server!');

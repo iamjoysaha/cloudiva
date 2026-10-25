@@ -6,7 +6,11 @@ import * as z from "zod";
 import db from "../db/db_init.js";
 import { users } from "../db/schema/users.js";
 import { eq, isNull, and } from "drizzle-orm";
-import { HASH_SALT_ROUNDS } from "../helpers/constants.js";
+import {
+  ACCESS_TOKEN_EXPIRY_INT,
+  HASH_SALT_ROUNDS,
+  REFRESH_TOKEN_EXPIRY_INT,
+} from "../helpers/constants.js";
 import bcrypt from "bcrypt";
 import {
   generateAccessToken,
@@ -124,6 +128,7 @@ const register = async (req: Request, res: Response) => {
           family_name,
           picture: googlePicture,
         } = payload;
+
         [existingUser] = await db
           .select()
           .from(users)
@@ -231,8 +236,11 @@ const login = async (req: Request, res: Response) => {
             message: responseMessages.public.error.credentials,
           });
         }
-        
-        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        const isPasswordValid = await bcrypt.compare(
+          password,
+          existingUser.password,
+        );
         if (!isPasswordValid) {
           return res.status(401).json({
             success: false,
@@ -246,7 +254,23 @@ const login = async (req: Request, res: Response) => {
 
         const { password: _password, ...safeUser } = existingUser;
 
-        res.status(200).json({
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: ACCESS_TOKEN_EXPIRY_INT,
+          path: "/",
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: REFRESH_TOKEN_EXPIRY_INT,
+          path: "/",
+        });
+
+        return res.status(200).json({
           success: true,
           status_code: 200,
           message: responseMessages.public.success.login,
@@ -303,7 +327,23 @@ const login = async (req: Request, res: Response) => {
         accessToken = generateAccessToken(existingGoogleUser);
         refreshToken = generateRefreshToken(existingGoogleUser);
 
-        res.status(200).json({
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: ACCESS_TOKEN_EXPIRY_INT,
+          path: "/",
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: REFRESH_TOKEN_EXPIRY_INT,
+          path: "/",
+        });
+
+        return res.status(200).json({
           success: true,
           status_code: 200,
           message: responseMessages.public.success.login,

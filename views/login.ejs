@@ -647,20 +647,32 @@
         }
         return true;
       }
+
       async function postLogin(payload) {
         const apiResponse = await fetch("http://localhost:3000/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+
         const result = await apiResponse.json();
         if (!apiResponse.ok || !result.success) {
+          throw new Error(result.message || "Login failed. Please try again.");
+        }
+
+        const { accessToken, refreshToken } = result;
+        if (!accessToken || !refreshToken) {
           throw new Error(
-            result.message || "Login failed. Please try again.",
+            "Authentication tokens were not returned by the server.",
           );
         }
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
         return result;
       }
+
       // Password show / hide
       togglePasswordBtn.addEventListener("click", () => {
         const isHidden = passwordInput.type === "password";
@@ -687,8 +699,7 @@
           };
           const result = await postLogin(payload);
           setStatus("Login successful!", "success");
-          console.log("Logged in user:", result.data);
-          // window.location.href = "/dashboard";
+          window.location.href = "/dashboard";
         } catch (error) {
           console.error("Login error:", error);
           setStatus(
@@ -718,8 +729,7 @@
             provider_token: response.credential,
           });
           setStatus("Login successful!", "success");
-          console.log("Logged in user:", result.data);
-          // window.location.href = "/dashboard";
+          window.location.href = "/dashboard";
         } catch (error) {
           console.error("Google login error:", error);
           setStatus(

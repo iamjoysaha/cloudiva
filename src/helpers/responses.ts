@@ -15,4 +15,23 @@ export const responseMessages = {
       user: "User not found.",
     },
   },
+  middlewares: {
+    success: {
+      auth: "Authentication successful.",
+      access: "Access granted.",
+    },
+    error: {
+      auth: "Authentication failed.",
+      access: "Unauthorized access.",
+      token: "Invalid or expired token.",
+    },
+  },
+  user: {
+    success: {
+      details: "User details fetched successfully.",
+    },
+    error: {
+      details: "Unable to fetch user details.",
+    },
+  },
 };
