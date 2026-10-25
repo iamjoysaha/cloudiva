@@ -34,4 +34,24 @@ export const responseMessages = {
       details: "Unable to fetch user details.",
     },
   },
+  folder: {
+    success: {
+      create: "Folder created successfully.",
+      found: "Folder fetched successfully.",
+    },
+    error: {
+      create: "Unable to create folder. Please try again.",
+      notFound: "Folder not found.",
+    },
+  },
+  file: {
+    success: {
+      upload: "Files uploaded successfully.",
+      found: "Files fetched successfully.",
+    },
+    error: {
+      upload: "Unable to upload files. Please try again later.",
+      notFound: "Files not found."
+    },
+  }
 };

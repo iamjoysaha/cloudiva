@@ -1,11 +1,23 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client } from "@aws-sdk/client-s3";
 
-const s3 = new S3Client({ forcePathStyle: true });
-const bucket = "assets";
-const key = "uploads/file.txt";
+const endpoint = process.env.AWS_ENDPOINT_URL_S3;
+const region = process.env.AWS_REGION;
+const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const bucket = process.env.AWS_BUCKET_NAME;
 
-await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: "Hello World!" }));
+if (!endpoint || !region || !accessKeyId || !secretAccessKey || !bucket) {
+  throw new Error("Missing required S3 environment variables");
+}
 
-const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn: 3600 });
-console.log(`[view] ${url}`);
+export const s3 = new S3Client({
+  endpoint,
+  region,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+});
+
+export const S3_BUCKET = bucket;
