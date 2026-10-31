@@ -29,9 +29,11 @@ export const responseMessages = {
   user: {
     success: {
       details: "User details fetched successfully.",
+      logout: "Logged out successfully.",
     },
     error: {
       details: "Unable to fetch user details.",
+      logout: "Unable to logout.",
     },
   },
   folder: {

@@ -74,7 +74,23 @@ const resetToken = () => {
 };
 
 const verifyToken = (token: string) => {
-  return jwt.verify(token, process.env.JWT_SECRET_KEY!);
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET_KEY!);
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new Error("Token has expired");
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error("Invalid token");
+    }
+
+    throw error;
+  }
+};
+
+const expireToken = (token: string) => {
+
 };
 
 export { generateAccessToken, generateRefreshToken, resetToken, verifyToken };

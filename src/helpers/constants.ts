@@ -12,4 +12,4 @@ export const VERIFY_TOKEN_EXPIRY_INT = 24 * 60 * 60 * 1000; // 24 hours
 export const MULTER_FILE_SIZE = 20 * 1024 * 1024; // 20 MB per file
 export const MULTER_MAX_FILE_UPLOAD = 10; // Maximum 10 files per request
 
-export const PRESIGNED_URL_EXPIRY = 900; // 9ms
+export const PRESIGNED_URL_EXPIRY = 9000; // 9 seconds

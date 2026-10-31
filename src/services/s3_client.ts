@@ -7,7 +7,7 @@ const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const bucket = process.env.AWS_BUCKET_NAME;
 
 if (!endpoint || !region || !accessKeyId || !secretAccessKey || !bucket) {
-  throw new Error("Missing required S3 environment variables");
+  throw new Error("Missing required AWS S3 environment variables");
 }
 
 export const s3 = new S3Client({
