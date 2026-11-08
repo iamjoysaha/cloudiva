@@ -40,10 +40,14 @@ export const responseMessages = {
     success: {
       create: "Folder created successfully.",
       found: "Folder fetched successfully.",
+      edit: "Folder updated successfully.",
+      delete: "Folder deleted successfully.",
     },
     error: {
       create: "Unable to create folder. Please try again.",
       notFound: "Folder not found.",
+      edit: "Unable to update folder. Please try again.",
+      delete: "Unable to delete folder. Please try again.",
     },
   },
   file: {

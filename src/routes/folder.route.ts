@@ -1,13 +1,12 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { createFolder, getFolders } from "../controllers/index.js";
+import { createFolder, deleteFolder, editFolder, getFolders, getTrashedFolders } from "../controllers/index.js";
 const router = Router();
 
 router.post("/", authMiddleware, createFolder);
 router.get("/", authMiddleware, getFolders);
-// router.get("/:id", authMiddleware, getFolderDetails); // parent and also it's subfolders
-// router.patch("/:id", authMiddleware, editFolder); // move, rename, restore
-// router.get("/trash", authMiddleware, getTrashedFolders);
-// router.delete("/:id", authMiddleware, deleteFolder); // soft or permanent
+router.patch("/:id", authMiddleware, editFolder); // operation=move or operation=rename or operation=restore
+router.get("/trashed", authMiddleware, getTrashedFolders);
+router.delete("/:id", authMiddleware, deleteFolder); // soft=1 or soft=0 (permanent delete)
 
 export default router;

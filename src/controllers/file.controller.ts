@@ -4,7 +4,7 @@ import { responseMessages } from "../helpers/responses.js";
 import { getFilesPayload, uploadFilePayload } from "../helpers/validator.js";
 import db from "../db/db_init.js";
 import { folders } from "../db/schema/folders.js";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { files } from "../db/schema/files.js";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
@@ -63,11 +63,34 @@ const uploadFiles = async (req: Request, res: Response) => {
     }
 
     const allowedMimeTypes = new Set([
+      "application/zip",
+      "application/x-rar-compressed",
+      "application/x-7z-compressed",
+      "application/x-tar",
+      "application/x-bzip2",
+      "application/x-gzip",
       "application/pdf",
+      "application/json",
+      "application/xml",
+      "text/csv",
       "image/jpeg",
       "image/png",
       "image/webp",
       "image/gif",
+      "image/svg+xml",
+      "video/mp4",
+      "video/webm",
+      "video/ogg",
+      "audio/mpeg",
+      "audio/ogg",
+      "audio/wav",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ]);
 
     // Validate every file before uploading any file.
@@ -277,4 +300,353 @@ const getFiles = async (req: Request, res: Response) => {
   }
 };
 
-export { uploadFiles, getFiles };
+const editFile = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        status_code: 400,
+        message: "File id not provided.",
+      });
+    }
+
+    const ownerId = (req as Request & { user: { id: string } }).user.id;
+    const { operation, folderId, name } = req.body;
+
+    // Load the file (must belong to the user)
+    const [file] = await db
+      .select()
+      .from(files)
+      .where(and(eq(files.id, id), eq(files.ownerId, ownerId)))
+      .limit(1);
+
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        status_code: 404,
+        message: responseMessages.file.error.notFound,
+      });
+    }
+
+    switch (operation) {
+      // -------------------------------------------------
+      // RENAME
+      // -------------------------------------------------
+      case "rename": {
+        if (!name || typeof name !== "string" || !name.trim()) {
+          return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message: "New name is required for rename operation.",
+          });
+        }
+
+        const newName = name.trim();
+
+        // Optional: prevent renaming a trashed file
+        if (file.isTrashed) {
+          return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message:
+              "Cannot rename a file that is in the trash. Restore it first.",
+          });
+        }
+
+        await db
+          .update(files)
+          .set({
+            originalName: newName, // this is the display name
+            updatedAt: new Date(),
+          })
+          .where(and(eq(files.id, id), eq(files.ownerId, ownerId)));
+
+        return res.status(200).json({
+          success: true,
+          status_code: 200,
+          message: "File renamed successfully.",
+        });
+      }
+
+      // -------------------------------------------------
+      // MOVE
+      // -------------------------------------------------
+      case "move": {
+        if (file.isTrashed) {
+          return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message:
+              "Cannot move a file that is in the trash. Restore it first.",
+          });
+        }
+
+        let targetFolderId: string | null = null;
+
+        if (folderId !== undefined && folderId !== null && folderId !== "") {
+          const [targetFolder] = await db
+            .select({ id: folders.id })
+            .from(folders)
+            .where(
+              and(
+                eq(folders.id, folderId),
+                eq(folders.ownerId, ownerId),
+                eq(folders.isTrashed, false),
+              ),
+            )
+            .limit(1);
+
+          if (!targetFolder) {
+            return res.status(404).json({
+              success: false,
+              status_code: 404,
+              message: responseMessages.folder.error.notFound,
+            });
+          }
+
+          targetFolderId = targetFolder.id;
+        }
+
+        // No-op if already in the same place
+        if (file.folderId === targetFolderId) {
+          return res.status(200).json({
+            success: true,
+            status_code: 200,
+            message: "File is already in the target location.",
+          });
+        }
+
+        await db
+          .update(files)
+          .set({
+            folderId: targetFolderId,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(files.id, id), eq(files.ownerId, ownerId)));
+
+        return res.status(200).json({
+          success: true,
+          status_code: 200,
+          message: "File moved successfully.",
+        });
+      }
+
+      // -------------------------------------------------
+      // RESTORE
+      // -------------------------------------------------
+      case "restore": {
+        if (!file.isTrashed) {
+          return res.status(400).json({
+            success: false,
+            status_code: 400,
+            message: "File is not in the trash.",
+          });
+        }
+
+        await db
+          .update(files)
+          .set({
+            isTrashed: false,
+            trashedAt: null,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(files.id, id),
+              eq(files.ownerId, ownerId),
+              eq(files.isTrashed, true),
+            ),
+          );
+
+        return res.status(200).json({
+          success: true,
+          status_code: 200,
+          message: "File restored successfully.",
+        });
+      }
+
+      default:
+        return res.status(400).json({
+          success: false,
+          status_code: 400,
+          message: "Invalid operation. Supported: rename, move, restore",
+        });
+    }
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        status_code: 400,
+        message:
+          error.issues[0]?.message ?? responseMessages.file.error.notFound,
+      });
+    }
+
+    console.error("editFile error:", error);
+    return res.status(500).json({
+      success: false,
+      status_code: 500,
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred",
+    });
+  }
+};
+
+const deleteFile = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const soft = req.query.soft;
+    const ownerId = (req as Request & { user: { id: string } }).user.id;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        status_code: 400,
+        message: "File id not provided.",
+      });
+    }
+
+    if (soft !== "0" && soft !== "1") {
+      return res.status(400).json({
+        success: false,
+        status_code: 400,
+        message: "Invalid soft parameter. Use soft=1 or soft=0.",
+      });
+    }
+
+    const isSoftDelete = soft === "1";
+
+    // -------------------------------------------------
+    // Find the file
+    // - soft delete  → must NOT be trashed yet
+    // - hard delete  → can be already trashed
+    // -------------------------------------------------
+    const conditions = [eq(files.id, id), eq(files.ownerId, ownerId)];
+
+    if (isSoftDelete) {
+      conditions.push(eq(files.isTrashed, false));
+    }
+
+    const [file] = await db
+      .select()
+      .from(files)
+      .where(and(...conditions))
+      .limit(1);
+
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        status_code: 404,
+        message: responseMessages.file.error.notFound,
+      });
+    }
+
+    if (isSoftDelete) {
+      // Soft delete → move to trash
+      await db
+        .update(files)
+        .set({
+          isTrashed: true,
+          trashedAt: new Date(),
+        })
+        .where(and(eq(files.id, id), eq(files.ownerId, ownerId)));
+
+      return res.status(200).json({
+        success: true,
+        status_code: 200,
+        message: "File moved to trash successfully.",
+      });
+    }
+
+    // Hard delete → remove from S3 + database
+    try {
+      if (file.s3Key) {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: S3_BUCKET,
+            Key: file.s3Key,
+          }),
+        );
+      }
+    } catch (s3Error) {
+      // Log but continue – we still want to remove the DB record
+      console.error("Failed to delete S3 object:", s3Error);
+    }
+
+    await db
+      .delete(files)
+      .where(and(eq(files.id, id), eq(files.ownerId, ownerId)));
+
+    return res.status(200).json({
+      success: true,
+      status_code: 200,
+      message: "File permanently deleted successfully.",
+    });
+  } catch (error: unknown) {
+    console.error("deleteFile error:", error);
+    return res.status(500).json({
+      success: false,
+      status_code: 500,
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred",
+    });
+  }
+};
+
+const getTrashedFiles = async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req as Request & { user: { id: string } }).user.id;
+
+    const trashedFiles = await db
+      .select({
+        id: files.id,
+        name: files.name,
+        originalName: files.originalName,
+        s3Key: files.s3Key,
+        mimeType: files.mimeType,
+        size: files.size,
+        folderId: files.folderId,
+        ownerId: files.ownerId,
+        isTrashed: files.isTrashed,
+        trashedAt: files.trashedAt,
+        createdAt: files.createdAt,
+        updatedAt: files.updatedAt,
+      })
+      .from(files)
+      .where(and(eq(files.ownerId, ownerId), eq(files.isTrashed, true)))
+      .orderBy(desc(files.trashedAt)); // most recently deleted first
+
+    // Add presigned URLs
+    const filesWithUrls = await Promise.all(
+      trashedFiles.map(async (file) => {
+        const { s3Key, ...fileData } = file;
+        const url = await getPresignedUrl(s3Key, file.mimeType);
+        return {
+          ...fileData,
+          url,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      success: true,
+      status_code: 200,
+      message: "Trashed files retrieved successfully.",
+      data: {
+        total_trashed_files: filesWithUrls.length,
+        trashed_files: filesWithUrls,
+      },
+    });
+  } catch (error: unknown) {
+    console.error("getTrashedFiles error:", error);
+    return res.status(500).json({
+      success: false,
+      status_code: 500,
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred",
+    });
+  }
+};
+
+export { uploadFiles, getFiles, editFile, deleteFile, getTrashedFiles };
