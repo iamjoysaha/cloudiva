@@ -189,6 +189,7 @@
         padding: 12px 24px;
         background: var(--card);
         border-bottom: 1px solid var(--line);
+        position: relative;
       }
       .search {
         flex: 1;
@@ -229,6 +230,51 @@
         color: #fff;
         border-color: var(--acc);
         font-weight: 700;
+        position: relative;
+      }
+
+      /* Account dropdown */
+      .account-menu {
+        position: absolute;
+        top: 56px;
+        right: 24px;
+        width: 260px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: var(--sh);
+        z-index: 25;
+        padding: 12px;
+        display: none;
+      }
+      .account-menu.open {
+        display: block;
+      }
+      .account-menu .name {
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .account-menu .email {
+        color: var(--mut);
+        font-size: 13px;
+        margin-top: 2px;
+        margin-bottom: 12px;
+        word-break: break-all;
+      }
+      .account-menu button {
+        width: 100%;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .account-menu button:hover {
+        background: var(--soft);
+      }
+      .account-menu .logout {
+        color: var(--acc2);
+        margin-top: 4px;
       }
 
       .content {
@@ -626,6 +672,9 @@
         .files.list .f .fm:nth-of-type(2) {
           display: none;
         }
+        .account-menu {
+          right: 12px;
+        }
       }
 
       .spinner {
@@ -668,7 +717,8 @@
           🗑 Trash
         </button>
         <div class="meter">
-          <b id="su">—</b> <span style="color: var(--mut)">of 15 GB used</span>
+          <b id="su">—</b>
+          <span style="color: var(--mut)" id="slimit">of — used</span>
           <div class="bar"><b id="sbar" style="width: 2%"></b></div>
           <small style="color: var(--mut)">Upgrade for more space</small>
         </div>
@@ -694,7 +744,16 @@
             ▦
           </button>
           <button class="ib" title="Theme" onclick="toggleTheme()">🌓</button>
-          <button class="ib av" id="avt" title="Account">C</button>
+          <button class="ib av" id="avt" title="Account" onclick="toggleAccountMenu()">
+            —
+          </button>
+
+          <!-- Account dropdown -->
+          <div class="account-menu" id="accountMenu">
+            <div class="name" id="accName">—</div>
+            <div class="email" id="accEmail">—</div>
+            <button onclick="logout()">Log out</button>
+          </div>
         </div>
         <div class="content" id="ct">
           <div class="spinner"></div>
@@ -751,6 +810,7 @@
         loading: false,
         path: [], // breadcrumb [{id, name}]
         drag: null, // { type: 'folder'|'file', id: string }
+        profile: null, // user profile from /user/profile
       };
 
       // ---------- Helpers ----------
@@ -763,7 +823,7 @@
       }
 
       function fmtSize(bytes) {
-        if (bytes == null || bytes === 0) return "—";
+        if (bytes == null || bytes === 0) return "0 B";
         if (bytes < 1024) return bytes + " B";
         if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
         if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + " MB";
@@ -820,6 +880,12 @@
         );
       }
 
+      function getInitials(first, last) {
+        const a = (first || "").trim().charAt(0);
+        const b = (last || "").trim().charAt(0);
+        return (a + b).toUpperCase() || "U";
+      }
+
       async function api(path, opts = {}) {
         const res = await fetch(API + path, {
           credentials: "include",
@@ -838,6 +904,83 @@
         return json;
       }
 
+      // ---------- Profile ----------
+      async function loadProfile() {
+        try {
+          const res = await api("/user/profile");
+          S.profile = res.data || null;
+          applyProfile();
+        } catch (err) {
+          console.error("Profile load failed:", err);
+          // Optional: redirect to login if unauthorized
+          // window.location.href = "/login";
+        }
+      }
+
+      function applyProfile() {
+        const p = S.profile;
+        if (!p) return;
+
+        // Avatar initials
+        const initials = getInitials(p.firstName, p.lastName);
+        $("#avt").textContent = initials;
+
+        // Account menu
+        $("#accName").textContent =
+          [p.firstName, p.lastName].filter(Boolean).join(" ") || "User";
+        $("#accEmail").textContent = p.email || "";
+
+        // Storage meter (dynamic)
+        updateStorageMeter();
+      }
+
+      function updateStorageMeter() {
+        const p = S.profile;
+        if (!p) {
+          $("#su").textContent = "—";
+          $("#slimit").textContent = "of — used";
+          $("#sbar").style.width = "2%";
+          return;
+        }
+
+        const used = Number(p.storageUsed) || 0;
+        const limit = Number(p.storageLimit) || 1;
+
+        $("#su").textContent = fmtSize(used);
+        $("#slimit").textContent = "of " + fmtSize(limit) + " used";
+
+        const pct = Math.min(100, (used / limit) * 100);
+        $("#sbar").style.width = Math.max(2, pct) + "%";
+      }
+
+      function toggleAccountMenu() {
+        const menu = $("#accountMenu");
+        menu.classList.toggle("open");
+      }
+
+      // Close account menu when clicking outside
+      document.addEventListener("click", (e) => {
+        const menu = $("#accountMenu");
+        const avt = $("#avt");
+        if (
+          menu.classList.contains("open") &&
+          !menu.contains(e.target) &&
+          e.target !== avt
+        ) {
+          menu.classList.remove("open");
+        }
+      });
+
+      async function logout() {
+        try {
+          await api("/user/logout", { method: "POST" });
+        } catch (err) {
+          // still redirect even if request fails
+          console.error(err);
+        }
+        window.location.href = "/login"; // change if your login route is different
+      }
+
       // ---------- Data ----------
       async function loadFolders() {
         const res = await api("/folder");
@@ -854,11 +997,13 @@
 
       async function loadTrashedFiles() {
         const res = await api("/file/trashed");
-        S.trashedFiles = (res.data?.trashed_files || res.data || []).map((f) => ({
-          ...f,
-          t: kindFromMime(f.mimeType, f.originalName || f.name),
-          displayName: f.originalName || f.name,
-        }));
+        S.trashedFiles = (res.data?.trashed_files || res.data || []).map(
+          (f) => ({
+            ...f,
+            t: kindFromMime(f.mimeType, f.originalName || f.name),
+            displayName: f.originalName || f.name,
+          }),
+        );
         return S.trashedFiles;
       }
 
@@ -1106,15 +1251,20 @@
         const actions = isTrash
           ? `<button title="Restore" onclick="restoreFile('${f.id}')">↩</button>
             <button title="Delete forever" onclick="hardDeleteFile('${f.id}')">✕</button>`
-          : `<button title="Download" onclick="downloadFile('${f.id}')">⬇</button>
+          : `<button title="Rename" onclick="showRenameFile('${f.id}')">✎</button>
+            <button title="Download" onclick="downloadFile('${f.id}')">⬇</button>
             <button title="Move to trash" onclick="softDeleteFile('${f.id}')">🗑</button>`;
 
         return `
           <div class="f" data-id="${f.id}" data-type="file"
             ${isTrash ? "" : `onclick="previewFile('${f.id}')"`}
-            ${isTrash ? "" : `draggable="true"
+            ${
+              isTrash
+                ? ""
+                : `draggable="true"
               ondragstart="onDragStart(event,'file','${f.id}')"
-              ondragend="onDragEnd(event)"`}>
+              ondragend="onDragEnd(event)"`
+            }>
             <div class="thumb" style="background:${TINT[f.t] || TINT.file}">${thumb}</div>
             <div>
               <div class="fn">${esc(f.displayName)}</div>
@@ -1218,18 +1368,7 @@
         }
 
         ct.innerHTML = html;
-        updateStorageMeter();
-      }
-
-      function updateStorageMeter() {
-        const totalBytes = S.files.reduce((a, f) => a + (f.size || 0), 0);
-        const usedMB = totalBytes / 1048576;
-        const limitGB = 15;
-        const usedGB = usedMB / 1024;
-        $("#su").textContent =
-          usedGB >= 1 ? usedGB.toFixed(2) + " GB" : usedMB.toFixed(1) + " MB";
-        const pct = Math.min(100, (usedGB / limitGB) * 100);
-        $("#sbar").style.width = Math.max(2, pct) + "%";
+        // Storage is now driven by profile, not by summing files
       }
 
       // ---------- Actions ----------
@@ -1238,11 +1377,8 @@
         render();
         try {
           if (S.view === "trash") {
-            await Promise.all([
-              loadTrashedFolders(),
-              loadTrashedFiles(),
-            ]);
-            S.files = [];               // keep normal files empty in trash view
+            await Promise.all([loadTrashedFolders(), loadTrashedFiles()]);
+            S.files = []; // keep normal files empty in trash view
           } else {
             await loadFolders();
             await loadFiles(S.folderId);
@@ -1323,6 +1459,52 @@
         }, 40);
       }
 
+      function showRenameFile(id) {
+        const file = S.files.find((f) => f.id === id);
+
+        if (!file) {
+          return toast("File not found");
+        }
+
+        const currentName = file.displayName || file.name || "";
+
+        $("#md").innerHTML = `
+          <div class="modal" onclick="if(event.target===this)closeModal()">
+            <div class="mb">
+              <h2>Rename file</h2>
+
+              <div class="fld">
+                <label>File name</label>
+                <input
+                  id="mi"
+                  value="${esc(currentName)}"
+                  placeholder="Enter new file name"
+                  autofocus
+                >
+              </div>
+
+              <div class="row">
+                <button class="ghost" onclick="closeModal()">Cancel</button>
+                <button class="pri" onclick="renameFile('${id}')">Save</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          const i = $("#mi");
+
+          if (i) {
+            i.focus();
+            i.select();
+
+            i.onkeydown = (e) => {
+              if (e.key === "Enter") renameFile(id);
+            };
+          }
+        }, 40);
+      }
+
       function closeModal() {
         $("#md").innerHTML = "";
       }
@@ -1362,6 +1544,48 @@
           await refresh();
         } catch (err) {
           toast(err.message || "Could not rename folder");
+        }
+      }
+
+      async function renameFile(id) {
+        const file = S.files.find((f) => f.id === id);
+        if (!file) return toast("File not found");
+
+        let name = ($("#mi")?.value || "").trim();
+
+        if (!name) {
+          return toast("Enter a file name");
+        }
+
+        // Preserve the original extension
+        const oldName = file.displayName || file.name || "";
+        const lastDot = oldName.lastIndexOf(".");
+
+        const extension = lastDot > 0 ? oldName.substring(lastDot) : "";
+
+        // Add extension if the user didn't provide one
+        if (
+          extension &&
+          !name.toLowerCase().endsWith(extension.toLowerCase())
+        ) {
+          name += extension;
+        }
+
+        try {
+          await api("/file/" + encodeURIComponent(id), {
+            method: "PATCH",
+            body: JSON.stringify({
+              operation: "rename",
+              name,
+            }),
+          });
+
+          closeModal();
+          toast("File renamed successfully");
+
+          await refresh();
+        } catch (err) {
+          toast(err.message || "Could not rename file");
         }
       }
 
@@ -1434,6 +1658,8 @@
           await api("/file/upload", { method: "POST", body: form });
           toast(fileList.length + " file(s) uploaded");
           await loadFiles(S.folderId);
+          // Refresh profile so storageUsed updates
+          await loadProfile();
           render();
         } catch (err) {
           toast(err.message || "Upload failed");
@@ -1471,12 +1697,14 @@
       }
 
       async function hardDeleteFile(id) {
-        if (!confirm("Delete this file forever? This cannot be undone.")) return;
+        if (!confirm("Delete this file forever? This cannot be undone."))
+          return;
         try {
           await api("/file/" + encodeURIComponent(id) + "?soft=0", {
             method: "DELETE",
           });
           toast("File permanently deleted");
+          await loadProfile(); // update storage after permanent delete
           await refresh();
         } catch (err) {
           toast(err.message || "Could not delete file");
@@ -1674,11 +1902,13 @@
         if (e.key === "Escape") {
           closePreview();
           closeModal();
+          $("#accountMenu").classList.remove("open");
         }
       });
 
       // ---------- Init ----------
       (async function init() {
+        await loadProfile(); // load user + storage first
         await refresh();
       })();
     </script>

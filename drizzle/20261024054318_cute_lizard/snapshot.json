@@ -607,7 +607,7 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "16106127360",
+      "default": "5368709120",
       "generated": null,
       "identity": null,
       "name": "storage_limit",
