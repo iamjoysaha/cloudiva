@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import z from "zod";
-import { responseMessages } from "../helpers/responses.js";
 import { getFilesPayload, uploadFilePayload } from "../helpers/validator.js";
 import db from "../db/db_init.js";
 import { folders } from "../db/schema/folders.js";
@@ -10,7 +9,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { s3, S3_BUCKET } from "../services/s3_client.js";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getPresignedUrl } from "../helpers/helper.js";
+import { allowedExtensions, file_types, getPresignedUrl } from "../helpers/helper.js";
 
 const uploadFiles = async (req: Request, res: Response) => {
   const uploadedKeys: string[] = [];
@@ -35,7 +34,7 @@ const uploadFiles = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          result.error.issues[0]?.message ?? responseMessages.file.error.upload,
+          result.error.issues[0]?.message ?? "Files not found. Please try again.",
       });
     }
 
@@ -57,45 +56,17 @@ const uploadFiles = async (req: Request, res: Response) => {
         return res.status(404).json({
           success: false,
           status_code: 404,
-          message: responseMessages.folder.error.notFound,
+          message: "Folder not found.",
         });
       }
     }
 
-    const allowedMimeTypes = new Set([
-      "application/zip",
-      "application/x-rar-compressed",
-      "application/x-7z-compressed",
-      "application/x-tar",
-      "application/x-bzip2",
-      "application/x-gzip",
-      "application/pdf",
-      "application/json",
-      "application/xml",
-      "text/csv",
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-      "image/svg+xml",
-      "video/mp4",
-      "video/webm",
-      "video/ogg",
-      "audio/mpeg",
-      "audio/ogg",
-      "audio/wav",
-      "text/plain",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.ms-excel",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.ms-powerpoint",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    ]);
+    const allowedMimeTypes = new Set(file_types);
 
-    // Validate every file before uploading any file.
     for (const file of uploadedFiles) {
-      if (!allowedMimeTypes.has(file.mimetype)) {
+      const extension = path.extname(file.originalname).toLowerCase();
+      const isAllowed = allowedExtensions.has(extension) || allowedMimeTypes.has(file.mimetype);
+      if (!isAllowed) {
         return res.status(400).json({
           success: false,
           status_code: 400,
@@ -160,11 +131,10 @@ const uploadFiles = async (req: Request, res: Response) => {
       return res.status(201).json({
         success: true,
         status_code: 201,
-        message: responseMessages.file.success.upload,
+        message: "Files uploaded successfully.",
         data: savedFiles,
       });
     } catch (dbError) {
-      // Clean up S3 objects if the database insert fails.
       const cleanupResults = await Promise.allSettled(
         uploadedKeys.map((key) =>
           s3.send(
@@ -189,7 +159,7 @@ const uploadFiles = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         status_code: 400,
-        message: error.issues[0]?.message ?? responseMessages.file.error.upload,
+        message: error.issues[0]?.message ?? "Failed to upload files.",
       });
     }
 
@@ -197,7 +167,7 @@ const uploadFiles = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       status_code: 500,
-      message: responseMessages.file.error.upload,
+      message: "Failed to upload files.",
     });
   }
 };
@@ -212,7 +182,7 @@ const getFiles = async (req: Request, res: Response) => {
         status_code: 400,
         message:
           result.error.issues[0]?.message ??
-          responseMessages.file.error.notFound,
+          "Files not found. Please try again.",
       });
     }
 
@@ -234,7 +204,7 @@ const getFiles = async (req: Request, res: Response) => {
         return res.status(404).json({
           success: false,
           status_code: 404,
-          message: responseMessages.folder.error.notFound,
+          message: "Folder not found.",
         });
       }
     }
@@ -264,7 +234,6 @@ const getFiles = async (req: Request, res: Response) => {
       .where(and(...conditions))
       .orderBy(files.name);
 
-    // Adding presigned urls to response
     const filesWithUrls = await Promise.all(
       allFiles.map(async (file) => {
         const { s3Key, ...fileData } = file;
@@ -279,7 +248,7 @@ const getFiles = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       status_code: 200,
-      message: responseMessages.file.success.found,
+      message: "Files found.",
       data: filesWithUrls,
     });
   } catch (error: unknown) {
@@ -288,14 +257,15 @@ const getFiles = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.file.error.notFound,
+          error.issues[0]?.message ?? "Files not found. Please try again.",
       });
     }
 
+    console.error("getFiles error:", error);
     return res.status(500).json({
       success: false,
       status_code: 500,
-      message: responseMessages.file.error.notFound,
+      message: "Failed to retrieve files.",
     });
   }
 };
@@ -314,7 +284,6 @@ const editFile = async (req: Request, res: Response) => {
     const ownerId = (req as Request & { user: { id: string } }).user.id;
     const { operation, folderId, name } = req.body;
 
-    // Load the file (must belong to the user)
     const [file] = await db
       .select()
       .from(files)
@@ -325,14 +294,11 @@ const editFile = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.file.error.notFound,
+        message: "Files not found. Please try again.",
       });
     }
 
     switch (operation) {
-      // -------------------------------------------------
-      // RENAME
-      // -------------------------------------------------
       case "rename": {
         if (!name || typeof name !== "string" || !name.trim()) {
           return res.status(400).json({
@@ -343,21 +309,19 @@ const editFile = async (req: Request, res: Response) => {
         }
 
         const newName = name.trim();
-
-        // Optional: prevent renaming a trashed file
+        // Prevent renaming a trashed file
         if (file.isTrashed) {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message:
-              "Cannot rename a file that is in the trash. Restore it first.",
+            message: "Cannot rename a file that is in the trash. Restore it first.",
           });
         }
 
         await db
           .update(files)
           .set({
-            originalName: newName, // this is the display name
+            originalName: newName,
             updatedAt: new Date(),
           })
           .where(and(eq(files.id, id), eq(files.ownerId, ownerId)));
@@ -369,21 +333,16 @@ const editFile = async (req: Request, res: Response) => {
         });
       }
 
-      // -------------------------------------------------
-      // MOVE
-      // -------------------------------------------------
       case "move": {
         if (file.isTrashed) {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message:
-              "Cannot move a file that is in the trash. Restore it first.",
+            message: "Cannot move a file that is in the trash. Restore it first.",
           });
         }
 
         let targetFolderId: string | null = null;
-
         if (folderId !== undefined && folderId !== null && folderId !== "") {
           const [targetFolder] = await db
             .select({ id: folders.id })
@@ -401,7 +360,7 @@ const editFile = async (req: Request, res: Response) => {
             return res.status(404).json({
               success: false,
               status_code: 404,
-              message: responseMessages.folder.error.notFound,
+              message: "Folder not found.",
             });
           }
 
@@ -432,9 +391,6 @@ const editFile = async (req: Request, res: Response) => {
         });
       }
 
-      // -------------------------------------------------
-      // RESTORE
-      // -------------------------------------------------
       case "restore": {
         if (!file.isTrashed) {
           return res.status(400).json({
@@ -479,7 +435,7 @@ const editFile = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.file.error.notFound,
+          error.issues[0]?.message ?? "Files not found. Please try again.",
       });
     }
 
@@ -516,12 +472,6 @@ const deleteFile = async (req: Request, res: Response) => {
     }
 
     const isSoftDelete = soft === "1";
-
-    // -------------------------------------------------
-    // Find the file
-    // - soft delete  → must NOT be trashed yet
-    // - hard delete  → can be already trashed
-    // -------------------------------------------------
     const conditions = [eq(files.id, id), eq(files.ownerId, ownerId)];
 
     if (isSoftDelete) {
@@ -538,12 +488,11 @@ const deleteFile = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.file.error.notFound,
+        message: "Files not found. Please try again.",
       });
     }
 
     if (isSoftDelete) {
-      // Soft delete → move to trash
       await db
         .update(files)
         .set({
@@ -559,7 +508,6 @@ const deleteFile = async (req: Request, res: Response) => {
       });
     }
 
-    // Hard delete → remove from S3 + database
     try {
       if (file.s3Key) {
         await s3.send(
@@ -570,7 +518,6 @@ const deleteFile = async (req: Request, res: Response) => {
         );
       }
     } catch (s3Error) {
-      // Log but continue – we still want to remove the DB record
       console.error("Failed to delete S3 object:", s3Error);
     }
 
@@ -615,9 +562,8 @@ const getTrashedFiles = async (req: Request, res: Response) => {
       })
       .from(files)
       .where(and(eq(files.ownerId, ownerId), eq(files.isTrashed, true)))
-      .orderBy(desc(files.trashedAt)); // most recently deleted first
+      .orderBy(desc(files.trashedAt));
 
-    // Add presigned URLs
     const filesWithUrls = await Promise.all(
       trashedFiles.map(async (file) => {
         const { s3Key, ...fileData } = file;

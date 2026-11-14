@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { responseMessages } from "./responses.js";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY, RESET_TOKEN_EXPIRY } from "./constants.js";
 
 interface UserObject {
@@ -19,7 +18,7 @@ interface UserObject {
 
 const generateAccessToken = (userObject: UserObject) => {
   if (!userObject) {
-    throw new Error(responseMessages.public.error.object);
+    throw new Error("User object is required to generate access token.");
   }
 
   const payload = {
@@ -44,7 +43,7 @@ const generateAccessToken = (userObject: UserObject) => {
 
 const generateRefreshToken = (userObject: UserObject) => {
   if (!userObject) {
-    throw new Error(responseMessages.public.error.object);
+    throw new Error("User object is required to generate refresh token.");
   }
 
   const payload = {
@@ -87,10 +86,6 @@ const verifyToken = (token: string) => {
 
     throw error;
   }
-};
-
-const expireToken = (token: string) => {
-
 };
 
 export { generateAccessToken, generateRefreshToken, resetToken, verifyToken };

@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-import { responseMessages } from "../helpers/responses.js";
 import z from "zod";
 import { createFolderPayload } from "../helpers/validator.js";
 import db from "../db/db_init.js";
@@ -36,7 +35,7 @@ const createFolder = async (req: Request, res: Response) => {
         return res.status(404).json({
           success: false,
           status_code: 404,
-          message: responseMessages.folder.error.notFound,
+          message: "Parent folder not found.",
         });
       }
 
@@ -56,7 +55,7 @@ const createFolder = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       status_code: 201,
-      message: responseMessages.folder.success.create,
+      message: "Folder created successfully.",
       data: folder,
     });
   } catch (error: unknown) {
@@ -65,7 +64,7 @@ const createFolder = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.folder.error.create,
+          error.issues[0]?.message ?? "Invalid folder creation payload.",
       });
     }
 
@@ -107,7 +106,7 @@ const getFolders = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       status_code: 200,
-      message: responseMessages.folder.success.found,
+      message: "Folders found.",
       data: rootFolders,
     });
   } catch (error: unknown) {
@@ -116,7 +115,7 @@ const getFolders = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.folder.error.notFound,
+          error.issues[0]?.message ?? "Folder not found. Please try again.",
       });
     }
 
@@ -145,7 +144,7 @@ const editFolder = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.folder.error.notFound,
+        message: "Folder not found.",
       });
     }
 
@@ -161,13 +160,11 @@ const editFolder = async (req: Request, res: Response) => {
         await db.update(folders).set({ name }).where(eq(folders.id, id));
         break;
       case "move": {
-        // parentId can be null (move to root)
         const newParentId =
           parentId === undefined || parentId === null || parentId === ""
             ? null
             : parentId;
 
-        // Cannot move a folder into itself
         if (newParentId === id) {
           return res.status(400).json({
             success: false,
@@ -201,7 +198,7 @@ const editFolder = async (req: Request, res: Response) => {
             return res.status(404).json({
               success: false,
               status_code: 404,
-              message: responseMessages.folder.error.notFound,
+              message: "Parent folder not found.",
             });
           }
 
@@ -238,7 +235,7 @@ const editFolder = async (req: Request, res: Response) => {
           return res.status(404).json({
             success: false,
             status_code: 404,
-            message: responseMessages.folder.error.notFound,
+            message: "Folder not found. Please try again.",
           });
         }
 
@@ -312,7 +309,7 @@ const editFolder = async (req: Request, res: Response) => {
           return res.status(404).json({
             success: false,
             status_code: 404,
-            message: responseMessages.folder.error.notFound,
+            message: "Folder not found. Please try again.",
           });
         }
 
@@ -348,7 +345,7 @@ const editFolder = async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       status_code: 200,
-      message: responseMessages.folder.success.edit,
+      message: "Folder updated successfully.",
     });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -356,7 +353,7 @@ const editFolder = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.folder.error.notFound,
+          error.issues[0]?.message ?? "Folder not found. Please try again.",
       });
     }
 
@@ -387,18 +384,11 @@ const deleteFolder = async (req: Request, res: Response) => {
     }
 
     const isSoftDelete = soft === "1";
-
-    // -------------------------------------------------
-    // Find the folder
-    // - soft delete  → must NOT be trashed yet
-    // - hard delete  → can be already trashed (Trash tab)
-    // -------------------------------------------------
     const conditions = [eq(folders.id, id), eq(folders.ownerId, ownerId)];
 
     if (isSoftDelete) {
       conditions.push(eq(folders.isTrashed, false));
     }
-    // for hard delete we deliberately do NOT require isTrashed = false
 
     const [folder] = await db
       .select()
@@ -410,7 +400,7 @@ const deleteFolder = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.folder.error.notFound,
+        message: "Folder not found. Please try again.",
       });
     }
 
@@ -432,7 +422,6 @@ const deleteFolder = async (req: Request, res: Response) => {
       const ids = folderIds.map((f) => f.id);
 
       if (isSoftDelete) {
-        // Soft delete → mark as trashed
         await tx
           .update(files)
           .set({
@@ -449,7 +438,6 @@ const deleteFolder = async (req: Request, res: Response) => {
           })
           .where(and(eq(folders.ownerId, ownerId), inArray(folders.id, ids)));
       } else {
-        // Hard delete → permanently remove
         await tx
           .delete(files)
           .where(and(eq(files.ownerId, ownerId), inArray(files.folderId, ids)));

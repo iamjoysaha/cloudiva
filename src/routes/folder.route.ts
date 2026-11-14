@@ -5,8 +5,8 @@ const router = Router();
 
 router.post("/", authMiddleware, createFolder);
 router.get("/", authMiddleware, getFolders);
-router.patch("/:id", authMiddleware, editFolder); // operation=move or operation=rename or operation=restore
+router.patch("/:id", authMiddleware, editFolder);
 router.get("/trashed", authMiddleware, getTrashedFolders);
-router.delete("/:id", authMiddleware, deleteFolder); // soft=1 or soft=0 (permanent delete)
+router.delete("/:id", authMiddleware, deleteFolder);
 
 export default router;

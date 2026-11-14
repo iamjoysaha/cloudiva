@@ -14,66 +14,103 @@
     />
     <style>
       :root {
-        --bg: #f6f7fb;
-        --card: #fff;
+        --bg: #f4f5f9;
+        --card: #ffffff;
         --ink: #0f1633;
         --mut: #5d6585;
-        --line: #e3e6f0;
+        --line: #e2e5f0;
         --acc: #4f5bff;
         --accd: #3d48e0;
         --soft: #eef0ff;
         --acc2: #ff6b4a;
         --lime: #c6f432;
+        --success: #16a34a;
         --r: 14px;
         --sh:
-          0 1px 2px rgba(15, 22, 51, 0.05),
-          0 6px 16px -8px rgba(15, 22, 51, 0.1);
+          0 1px 2px rgba(15, 22, 51, 0.04),
+          0 8px 24px -10px rgba(15, 22, 51, 0.1);
+        --sh-lg: 0 20px 50px -20px rgba(15, 22, 51, 0.25);
+        --preview-bg: rgba(15, 22, 51, 0.55);
+        --preview-header: rgba(255, 255, 255, 0.92);
+        --preview-ink: #0f1633;
+        --preview-mut: #5d6585;
+        --code-bg: #f8f9fc;
+        --code-border: #e2e5f0;
         box-sizing: border-box;
         padding-top: env(safe-area-inset-top, 0px);
         padding-bottom: env(safe-area-inset-bottom, 0px);
       }
+
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme="light"]) {
-          --bg: #12121c;
-          --card: #1c1c2b;
+          --bg: #0f0f17;
+          --card: #181825;
           --ink: #f1efe8;
           --mut: #9a98ad;
-          --line: #2b2b3d;
+          --line: #2a2a3d;
           --soft: #23274d;
+          --preview-bg: rgba(8, 8, 14, 0.72);
+          --preview-header: rgba(24, 24, 37, 0.92);
+          --preview-ink: #f1efe8;
+          --preview-mut: #9a98ad;
+          --code-bg: #12121c;
+          --code-border: #2a2a3d;
         }
       }
+
       :root[data-theme="dark"] {
-        --bg: #12121c;
-        --card: #1c1c2b;
+        --bg: #0f0f17;
+        --card: #181825;
         --ink: #f1efe8;
         --mut: #9a98ad;
-        --line: #2b2b3d;
+        --line: #2a2a3d;
         --soft: #23274d;
+        --preview-bg: rgba(8, 8, 14, 0.72);
+        --preview-header: rgba(24, 24, 37, 0.92);
+        --preview-ink: #f1efe8;
+        --preview-mut: #9a98ad;
+        --code-bg: #12121c;
+        --code-border: #2a2a3d;
       }
+
+      :root[data-theme="light"] {
+        --preview-bg: rgba(15, 22, 51, 0.48);
+        --preview-header: rgba(255, 255, 255, 0.94);
+        --preview-ink: #0f1633;
+        --preview-mut: #5d6585;
+        --code-bg: #f8f9fc;
+        --code-border: #e2e5f0;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
       }
+
       html {
         height: 100%;
         scroll-padding-top: env(safe-area-inset-top, 0px);
       }
+
       body {
         height: 100%;
         background: var(--bg);
         color: var(--ink);
         font:
-          15px/1.4 Inter,
+          15px/1.45 Inter,
           "Segoe UI",
           system-ui,
           sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
+
       button,
       input,
       select {
         font: inherit;
         color: inherit;
       }
+
       button {
         cursor: pointer;
         border: 0;
@@ -81,8 +118,10 @@
         transition:
           background 0.15s,
           border-color 0.15s,
-          box-shadow 0.15s;
+          box-shadow 0.15s,
+          transform 0.12s;
       }
+
       .hide {
         display: none !important;
       }
@@ -91,18 +130,20 @@
       #app {
         height: 100%;
         display: grid;
-        grid-template-columns: 248px 1fr;
+        grid-template-columns: 256px 1fr;
         padding: 0;
         gap: 0;
       }
+
       aside {
         background: var(--card);
         border-right: 1px solid var(--line);
-        padding: 18px 12px;
+        padding: 20px 14px;
         display: flex;
         flex-direction: column;
         gap: 2px;
       }
+
       .logo {
         display: flex;
         align-items: center;
@@ -110,69 +151,106 @@
         font-weight: 800;
         font-size: 20px;
         letter-spacing: -0.5px;
-        padding: 6px 8px 14px;
+        padding: 4px 8px 16px;
       }
+
       .logo i {
         width: 28px;
         height: 28px;
         border-radius: 9px 9px 9px 2px;
-        background: var(--acc);
+        background: linear-gradient(135deg, var(--acc), #7b85ff);
         display: block;
+        box-shadow: 0 4px 12px rgba(79, 91, 255, 0.35);
       }
+
       .newb {
         background: var(--acc);
         color: #fff;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
-        margin: 8px 0 12px;
+        margin: 4px 0 14px;
         padding: 12px;
         display: flex;
         gap: 8px;
         justify-content: center;
+        box-shadow: 0 4px 14px rgba(79, 91, 255, 0.25);
       }
+
       .newb:hover {
         background: var(--accd);
+        transform: translateY(-1px);
       }
+
       .nav {
         display: flex;
         gap: 12px;
         align-items: center;
-        padding: 10px 14px;
-        border-radius: 8px;
+        padding: 11px 14px;
+        border-radius: 10px;
         color: var(--mut);
         text-align: left;
         width: 100%;
         font-weight: 500;
       }
+
       .nav:hover {
         background: var(--soft);
         color: var(--ink);
       }
+
       .nav.on {
         background: var(--soft);
         color: var(--acc);
         font-weight: 600;
       }
+
       .meter {
         margin-top: auto;
         background: var(--bg);
-        border-radius: 12px;
-        padding: 14px;
+        border-radius: 14px;
+        padding: 16px;
         border: 1px solid var(--line);
       }
+
+      .meter .usage-label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
       .bar {
-        height: 8px;
+        height: 7px;
         border-radius: 9px;
         background: var(--line);
         overflow: hidden;
-        margin: 8px 0;
+        margin: 10px 0 12px;
       }
+
       .bar b {
         display: block;
         height: 100%;
-        background: var(--acc);
+        background: linear-gradient(90deg, var(--acc), #7b85ff);
         width: 0;
-        transition: width 0.4s;
+        transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        border-radius: 9px;
+      }
+
+      .upgrade-btn {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 9px;
+        background: var(--acc);
+        color: #fff;
+        font-weight: 600;
+        font-size: 13.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .upgrade-btn:hover {
+        background: var(--accd);
       }
 
       main {
@@ -182,6 +260,7 @@
         min-width: 0;
         overflow: hidden;
       }
+
       .top {
         display: flex;
         gap: 12px;
@@ -191,6 +270,7 @@
         border-bottom: 1px solid var(--line);
         position: relative;
       }
+
       .search {
         flex: 1;
         max-width: 520px;
@@ -199,13 +279,19 @@
         gap: 8px;
         background: var(--bg);
         border: 1px solid var(--line);
-        border-radius: 10px;
+        border-radius: 11px;
         padding: 0 16px;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
       }
+
       .search:focus-within {
         background: var(--card);
         border-color: var(--acc);
+        box-shadow: 0 0 0 3px rgba(79, 91, 255, 0.12);
       }
+
       .search input {
         border: 0;
         background: none;
@@ -213,18 +299,21 @@
         padding: 11px 0;
         width: 100%;
       }
+
       .ib {
         width: 40px;
         height: 40px;
-        border-radius: 10px;
+        border-radius: 11px;
         background: var(--card);
         border: 1px solid var(--line);
         display: grid;
         place-items: center;
       }
+
       .ib:hover {
         background: var(--soft);
       }
+
       .av {
         background: var(--acc);
         color: #fff;
@@ -233,7 +322,6 @@
         position: relative;
       }
 
-      /* Account dropdown */
       .account-menu {
         position: absolute;
         top: 56px;
@@ -241,19 +329,22 @@
         width: 260px;
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 12px;
-        box-shadow: var(--sh);
+        border-radius: 14px;
+        box-shadow: var(--sh-lg);
         z-index: 25;
-        padding: 12px;
+        padding: 14px;
         display: none;
       }
+
       .account-menu.open {
         display: block;
       }
+
       .account-menu .name {
         font-weight: 700;
         font-size: 15px;
       }
+
       .account-menu .email {
         color: var(--mut);
         font-size: 13px;
@@ -261,17 +352,20 @@
         margin-bottom: 12px;
         word-break: break-all;
       }
+
       .account-menu button {
         width: 100%;
         text-align: left;
         padding: 10px 12px;
-        border-radius: 8px;
+        border-radius: 9px;
         font-weight: 500;
         color: var(--ink);
       }
+
       .account-menu button:hover {
         background: var(--soft);
       }
+
       .account-menu .logout {
         color: var(--acc2);
         margin-top: 4px;
@@ -280,11 +374,12 @@
       .content {
         flex: 1;
         overflow: auto;
-        padding: 4px 24px 32px;
+        padding: 4px 24px 40px;
       }
+
       .content.drag {
         outline: 3px dashed var(--acc);
-        outline-offset: -10px;
+        outline-offset: -12px;
       }
 
       h3 {
@@ -293,7 +388,7 @@
         text-transform: uppercase;
         letter-spacing: 1px;
         color: var(--mut);
-        margin: 22px 0 12px;
+        margin: 22px 0 14px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -301,9 +396,10 @@
 
       .files.grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
         gap: 14px;
       }
+
       .f {
         background: var(--card);
         border: 1px solid var(--line);
@@ -318,21 +414,26 @@
           box-shadow 0.15s,
           opacity 0.15s;
       }
+
       .f:hover {
         border-color: var(--acc);
+        box-shadow: 0 8px 24px -10px rgba(79, 91, 255, 0.2);
       }
+
       .f.dragging {
         opacity: 0.45;
         transform: scale(0.97);
       }
+
       .f.drop-target {
         border-color: var(--acc);
         box-shadow: 0 0 0 3px rgba(79, 91, 255, 0.25);
         background: var(--soft);
       }
+
       .thumb {
-        height: 90px;
-        border-radius: 10px;
+        height: 92px;
+        border-radius: 11px;
         display: grid;
         place-items: center;
         font-size: 34px;
@@ -340,22 +441,30 @@
         overflow: hidden;
         background: #f0f2f8;
       }
+
+      :root[data-theme="dark"] .thumb {
+        background: #222233;
+      }
+
       .thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 11px;
       }
+
       .fn {
         font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
       .fm {
         color: var(--mut);
         font-size: 12px;
       }
+
       .acts {
         position: absolute;
         top: 8px;
@@ -365,9 +474,11 @@
         opacity: 0;
         transition: 0.15s;
       }
+
       .f:hover .acts {
         opacity: 1;
       }
+
       .acts button {
         width: 28px;
         height: 28px;
@@ -376,6 +487,7 @@
         border: 1px solid var(--line);
         font-size: 13px;
       }
+
       .acts button:hover {
         background: var(--soft);
       }
@@ -385,6 +497,7 @@
         flex-direction: column;
         gap: 6px;
       }
+
       .files.list .f {
         display: grid;
         grid-template-columns: 44px 1fr 90px 110px;
@@ -392,6 +505,7 @@
         gap: 12px;
         padding: 8px 12px;
       }
+
       .files.list .thumb {
         height: 40px;
         width: 40px;
@@ -399,6 +513,7 @@
         font-size: 20px;
         border-radius: 10px;
       }
+
       .files.list .acts {
         position: static;
         opacity: 1;
@@ -408,11 +523,17 @@
       .empty {
         text-align: center;
         color: var(--mut);
-        padding: 60px 20px;
+        padding: 72px 20px;
       }
+
       .empty .big {
-        font-size: 48px;
-        margin-bottom: 12px;
+        font-size: 52px;
+        margin-bottom: 14px;
+        opacity: 0.9;
+      }
+
+      .empty p {
+        font-size: 15px;
       }
 
       .crumb {
@@ -420,15 +541,19 @@
         gap: 6px;
         align-items: center;
         color: var(--mut);
-        margin: 14px 0 0;
+        margin: 16px 0 0;
         flex-wrap: wrap;
+        font-size: 14px;
       }
+
       .crumb a {
         cursor: pointer;
       }
+
       .crumb a:hover {
         color: var(--acc);
       }
+
       .crumb .drop-root.drop-target,
       .crumb .drop-crumb.drop-target {
         color: var(--acc);
@@ -439,131 +564,167 @@
         padding: 2px 6px;
       }
 
-      /* Modal */
+      /* Modal base */
       .modal {
         position: fixed;
         inset: 0;
-        background: rgba(15, 22, 51, 0.45);
+        background: rgba(15, 22, 51, 0.5);
+        backdrop-filter: blur(4px);
         display: grid;
         place-items: center;
-        z-index: 20;
+        z-index: 40;
+        padding: 20px;
       }
+
       .mb {
         background: var(--card);
-        padding: 24px;
-        border-radius: 16px;
+        padding: 28px;
+        border-radius: 18px;
         width: min(400px, 92vw);
-        box-shadow: 0 30px 60px -20px rgba(15, 22, 51, 0.5);
+        box-shadow: var(--sh-lg);
       }
+
       .mb h2 {
-        margin-bottom: 14px;
+        margin-bottom: 16px;
         font-size: 20px;
+        font-weight: 700;
       }
+
       .fld {
-        margin-bottom: 12px;
+        margin-bottom: 14px;
       }
+
       .fld label {
         display: block;
         font-size: 13px;
         color: var(--mut);
-        margin-bottom: 5px;
+        margin-bottom: 6px;
+        font-weight: 500;
       }
+
       .fld input,
       .fld select {
         width: 100%;
         padding: 12px 14px;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid var(--line);
         background: var(--card);
         outline: 0;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
       }
+
       .fld input:focus {
         border-color: var(--acc);
-        box-shadow: 0 0 0 3px rgba(79, 91, 255, 0.18);
+        box-shadow: 0 0 0 3px rgba(79, 91, 255, 0.16);
       }
+
       .row {
         display: flex;
         gap: 8px;
-        margin-top: 14px;
+        margin-top: 16px;
         justify-content: flex-end;
       }
+
       .row button {
         padding: 10px 18px;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
       }
+
       .pri {
         background: var(--acc);
         color: #fff;
       }
+
       .pri:hover {
         background: var(--accd);
       }
+
       .ghost {
         border: 1px solid var(--line);
         background: var(--card);
       }
+
       .ghost:hover {
         background: var(--soft);
       }
+
       .danger {
         background: var(--acc2);
         color: #fff;
       }
+
       .danger:hover {
         filter: brightness(1.08);
       }
 
       .toast {
         position: fixed;
-        bottom: 24px;
+        bottom: 28px;
         left: 50%;
         transform: translateX(-50%);
         background: var(--ink);
         color: var(--bg);
-        padding: 10px 18px;
-        border-radius: 10px;
-        z-index: 30;
-        box-shadow: var(--sh);
+        padding: 12px 20px;
+        border-radius: 12px;
+        z-index: 50;
+        box-shadow: var(--sh-lg);
         font-weight: 500;
+        font-size: 14px;
       }
 
-      /* Preview overlay */
+      /* ===== Preview overlay (theme-aware + transparent) ===== */
       .pv {
         position: fixed;
         inset: 0;
-        z-index: 15;
-        background: rgba(15, 22, 51, 0.93);
+        z-index: 35;
+        background: var(--preview-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         display: flex;
         flex-direction: column;
       }
+
       .pvh {
         display: flex;
         align-items: center;
         gap: 12px;
         padding: 12px 20px;
-        color: #fff;
-        background: #0f1633;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--preview-ink);
+        background: var(--preview-header);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(16px);
       }
+
       .pvh .ib {
         background: transparent;
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--preview-ink);
+        border-color: var(--line);
       }
+
+      .pvh .ib:hover {
+        background: var(--soft);
+      }
+
       .pvh .fm {
-        color: #aab0d0;
+        color: var(--preview-mut);
       }
+
       .btn2 {
         padding: 10px 16px;
-        border-radius: 8px;
+        border-radius: 9px;
         font-weight: 600;
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: var(--preview-ink);
+        border: 1px solid var(--line);
+        background: transparent;
       }
+
       .btn2:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--soft);
       }
+
       .pvb {
         flex: 1;
         overflow: auto;
@@ -572,35 +733,105 @@
         padding: 24px;
         min-height: 0;
       }
+
       .pvimg {
         max-width: 100%;
-        max-height: 100%;
-        border-radius: 10px;
+        max-height: calc(100vh - 120px);
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
       }
+
       .pvfr {
-        width: min(900px, 100%);
-        height: 100%;
+        width: min(960px, 100%);
+        height: calc(100vh - 140px);
         border: 0;
         background: #fff;
-        border-radius: 10px;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       }
-      .sheet-wrap {
-        background: #fff;
-        color: #0f1633;
-        border-radius: 10px;
+
+      /* Video / Audio players */
+      .media-wrap {
+        width: min(960px, 100%);
+        max-height: calc(100vh - 140px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .media-wrap video {
         max-width: 100%;
-        max-height: 100%;
-        overflow: auto;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        max-height: calc(100vh - 180px);
+        border-radius: 12px;
+        background: #000;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
       }
+
+      .media-wrap audio {
+        width: min(480px, 100%);
+      }
+
+      /* Code / text viewer */
+      .code-viewer {
+        width: min(920px, 100%);
+        max-height: calc(100vh - 140px);
+        background: var(--code-bg);
+        border: 1px solid var(--code-border);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      }
+
+      .code-meta {
+        padding: 10px 16px;
+        font-size: 12px;
+        color: var(--preview-mut);
+        border-bottom: 1px solid var(--code-border);
+        background: var(--card);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .code-body {
+        overflow: auto;
+        flex: 1;
+        margin: 0;
+        padding: 18px 20px;
+        font-family:
+          "SF Mono", "Fira Code", "Cascadia Code", ui-monospace, Menlo,
+          Consolas, monospace;
+        font-size: 13.5px;
+        line-height: 1.55;
+        color: var(--preview-ink);
+        white-space: pre-wrap;
+        word-break: break-word;
+        tab-size: 2;
+      }
+
+      .sheet-wrap {
+        background: var(--card);
+        color: var(--ink);
+        border-radius: 12px;
+        max-width: 100%;
+        max-height: calc(100vh - 140px);
+        overflow: auto;
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--line);
+      }
+
       .sheet-wrap table {
         border-collapse: collapse;
         min-width: 100%;
         font-size: 13px;
       }
+
       .sheet-wrap th,
       .sheet-wrap td {
-        border: 1px solid #e3e6f0;
+        border: 1px solid var(--line);
         padding: 8px 12px;
         text-align: left;
         white-space: nowrap;
@@ -608,46 +839,48 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
       .sheet-wrap th {
-        background: #f6f7fb;
+        background: var(--bg);
         font-weight: 600;
         position: sticky;
         top: 0;
         z-index: 1;
       }
+
       .sheet-wrap tr:nth-child(even) td {
-        background: #fafbfe;
+        background: color-mix(in srgb, var(--bg) 60%, transparent);
       }
+
       .sheet-meta {
         padding: 10px 14px;
         font-size: 12px;
-        color: #5d6585;
-        border-bottom: 1px solid #e3e6f0;
-        background: #f6f7fb;
+        color: var(--mut);
+        border-bottom: 1px solid var(--line);
+        background: var(--bg);
       }
-      .arr {
-        position: absolute;
-        top: 50%;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.14);
-        color: #fff;
-        font-size: 26px;
+
+      .preview-fallback {
+        text-align: center;
+        color: var(--preview-ink);
+        max-width: 420px;
       }
-      .arr:hover {
-        background: rgba(255, 255, 255, 0.28);
+
+      .preview-fallback .icon {
+        font-size: 64px;
+        margin-bottom: 16px;
       }
-      .arr.l {
-        left: 14px;
-      }
-      .arr.r {
-        right: 14px;
+
+      .preview-fallback p {
+        color: var(--preview-mut);
+        margin-top: 8px;
+        line-height: 1.5;
       }
 
       .menu {
         display: none;
       }
+
       @media (max-width: 800px) {
         #app {
           grid-template-columns: 1fr;
@@ -655,10 +888,10 @@
         aside {
           position: fixed;
           inset: 0 auto 0 0;
-          width: 260px;
-          z-index: 10;
+          width: 270px;
+          z-index: 20;
           transform: translateX(-100%);
-          transition: 0.2s;
+          transition: 0.22s cubic-bezier(0.22, 1, 0.36, 1);
         }
         aside.open {
           transform: none;
@@ -686,6 +919,7 @@
         animation: spin 0.7s linear infinite;
         margin: 40px auto;
       }
+
       @keyframes spin {
         to {
           transform: rotate(360deg);
@@ -694,11 +928,261 @@
 
       .drop-hint {
         border: 2px dashed var(--line);
-        border-radius: 14px;
+        border-radius: 16px;
         padding: 40px;
         text-align: center;
         color: var(--mut);
-        margin-top: 12px;
+        margin-top: 16px;
+        background: color-mix(in srgb, var(--card) 60%, transparent);
+      }
+
+      /* ===== Pricing ===== */
+      .pricing-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 45;
+        background: var(--bg);
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .pricing-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 28px;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      .pricing-header h1 {
+        font-size: 18px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .pricing-body {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+        width: 100%;
+      }
+
+      .pricing-intro {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+
+      .pricing-intro h2 {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        margin-bottom: 10px;
+      }
+
+      .pricing-intro p {
+        color: var(--mut);
+        font-size: 16px;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      .billing-toggle {
+        display: inline-flex;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px;
+        margin: 28px auto 0;
+        gap: 2px;
+      }
+
+      .billing-toggle button {
+        padding: 9px 22px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--mut);
+      }
+
+      .billing-toggle button.active {
+        background: var(--acc);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(79, 91, 255, 0.3);
+      }
+
+      .save-badge {
+        background: var(--lime);
+        color: #0f1633;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+
+      .plans {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 36px;
+      }
+
+      @media (max-width: 900px) {
+        .plans {
+          grid-template-columns: 1fr;
+          max-width: 400px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+
+      .plan {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 28px 24px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s;
+      }
+
+      .plan:hover {
+        border-color: color-mix(in srgb, var(--acc) 40%, var(--line));
+        box-shadow: var(--sh);
+      }
+
+      .plan.featured {
+        border-color: var(--acc);
+        box-shadow:
+          0 0 0 1px var(--acc),
+          var(--sh-lg);
+        transform: scale(1.02);
+      }
+
+      .plan .badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--acc);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .plan .plan-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--mut);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 8px;
+      }
+
+      .plan .price {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.1;
+      }
+
+      .plan .price span {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--mut);
+        letter-spacing: 0;
+      }
+
+      .plan .price-note {
+        font-size: 13px;
+        color: var(--mut);
+        margin-top: 4px;
+        margin-bottom: 20px;
+        min-height: 18px;
+      }
+
+      .plan ul {
+        list-style: none;
+        margin: 0 0 28px;
+        flex: 1;
+      }
+
+      .plan li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 7px 0;
+        font-size: 14px;
+        color: var(--ink);
+      }
+
+      .plan li::before {
+        content: "✓";
+        color: var(--success);
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .plan .cta {
+        width: 100%;
+        padding: 13px;
+        border-radius: 11px;
+        font-weight: 600;
+        font-size: 15px;
+        text-align: center;
+      }
+
+      .plan .cta.primary {
+        background: var(--acc);
+        color: #fff;
+      }
+
+      .plan .cta.primary:hover {
+        background: var(--accd);
+      }
+
+      .plan .cta.secondary {
+        background: var(--soft);
+        color: var(--acc);
+        border: 1px solid transparent;
+      }
+
+      .plan .cta.secondary:hover {
+        border-color: var(--acc);
+      }
+
+      .plan .cta.current {
+        background: var(--bg);
+        color: var(--mut);
+        cursor: default;
+      }
+
+      .pricing-footer {
+        text-align: center;
+        margin-top: 48px;
+        color: var(--mut);
+        font-size: 13px;
+      }
+
+      .pricing-footer a {
+        color: var(--acc);
+        text-decoration: none;
+        font-weight: 500;
       }
     </style>
   </head>
@@ -710,17 +1194,18 @@
         <button class="nav on" data-v="drive" onclick="setView('drive')">
           🗂 My Drive
         </button>
-        <button class="nav" data-v="recent" onclick="setView('recent')">
-          🕘 Recent
-        </button>
         <button class="nav" data-v="trash" onclick="setView('trash')">
           🗑 Trash
         </button>
         <div class="meter">
-          <b id="su">—</b>
-          <span style="color: var(--mut)" id="slimit">of — used</span>
+          <div class="usage-label"><b id="su">—</b></div>
+          <div style="color: var(--mut); font-size: 13px" id="slimit">
+            of — used
+          </div>
           <div class="bar"><b id="sbar" style="width: 2%"></b></div>
-          <small style="color: var(--mut)">Upgrade for more space</small>
+          <button class="upgrade-btn" onclick="openPricing()">
+            ⬆ Get more space
+          </button>
         </div>
       </aside>
 
@@ -744,11 +1229,15 @@
             ▦
           </button>
           <button class="ib" title="Theme" onclick="toggleTheme()">🌓</button>
-          <button class="ib av" id="avt" title="Account" onclick="toggleAccountMenu()">
+          <button
+            class="ib av"
+            id="avt"
+            title="Account"
+            onclick="toggleAccountMenu()"
+          >
             —
           </button>
 
-          <!-- Account dropdown -->
           <div class="account-menu" id="accountMenu">
             <div class="name" id="accName">—</div>
             <div class="email" id="accEmail">—</div>
@@ -771,6 +1260,7 @@
 
     <div id="md"></div>
     <div id="pv"></div>
+    <div id="pricing"></div>
 
     <script>
       const API = ""; // same-origin
@@ -784,7 +1274,9 @@
         pdf: "📕",
         sheet: "📊",
         vid: "🎬",
+        audio: "🎵",
         zip: "🗜️",
+        code: "💻",
         file: "📎",
       };
       const TINT = {
@@ -794,24 +1286,135 @@
         pdf: "#ffdede",
         sheet: "#d7f5ef",
         vid: "#eadcff",
+        audio: "#ffe8f0",
         zip: "#ececec",
+        code: "#e8f0ff",
         file: "#ececec",
       };
 
+      // Allowed text/code extensions for in-browser preview
+      const TEXT_EXTS = new Set([
+        ".c",
+        ".h",
+        ".cpp",
+        ".cc",
+        ".cxx",
+        ".hpp",
+        ".hh",
+        ".hxx",
+        ".py",
+        ".pyw",
+        ".pyi",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".java",
+        ".cs",
+        ".go",
+        ".rs",
+        ".rb",
+        ".php",
+        ".swift",
+        ".kt",
+        ".kts",
+        ".scala",
+        ".dart",
+        ".lua",
+        ".pl",
+        ".pm",
+        ".hs",
+        ".ex",
+        ".exs",
+        ".clj",
+        ".fs",
+        ".fsx",
+        ".ml",
+        ".mli",
+        ".html",
+        ".htm",
+        ".css",
+        ".scss",
+        ".sass",
+        ".less",
+        ".vue",
+        ".svelte",
+        ".sh",
+        ".bash",
+        ".zsh",
+        ".bat",
+        ".cmd",
+        ".ps1",
+        ".sql",
+        ".json",
+        ".xml",
+        ".yaml",
+        ".yml",
+        ".toml",
+        ".ini",
+        ".conf",
+        ".env",
+        ".md",
+        ".mdx",
+        ".txt",
+        ".ipynb",
+        ".r",
+        ".jl",
+        ".m",
+      ]);
+
       // ---------- State ----------
       const S = {
-        view: "drive", // drive | recent | trash
-        folderId: null, // null = root
+        view: "drive",
+        folderId: null,
         folderTree: [],
         trashedFolders: [],
-        trashFiles: [],
+        trashedFiles: [],
         files: [],
         grid: true,
         loading: false,
-        path: [], // breadcrumb [{id, name}]
-        drag: null, // { type: 'folder'|'file', id: string }
-        profile: null, // user profile from /user/profile
+        path: [],
+        drag: null,
+        profile: null,
+        billing: "yearly",
       };
+
+      // ---------- Persistence ----------
+      function loadPrefs() {
+        try {
+          const prefs = JSON.parse(
+            localStorage.getItem("cloudiva_prefs") || "{}",
+          );
+          if (prefs.view === "drive" || prefs.view === "trash")
+            S.view = prefs.view;
+          if (typeof prefs.grid === "boolean") S.grid = prefs.grid;
+          if (prefs.theme === "light" || prefs.theme === "dark") {
+            document.documentElement.dataset.theme = prefs.theme;
+          }
+        } catch (_) {}
+      }
+
+      function savePrefs() {
+        const theme =
+          document.documentElement.dataset.theme ||
+          (getComputedStyle(document.documentElement)
+            .getPropertyValue("--bg")
+            .trim() === "#0f0f17"
+            ? "dark"
+            : "light");
+        localStorage.setItem(
+          "cloudiva_prefs",
+          JSON.stringify({
+            view: S.view,
+            grid: S.grid,
+            theme,
+          }),
+        );
+      }
 
       // ---------- Helpers ----------
       function toast(msg) {
@@ -842,35 +1445,69 @@
         return d.toLocaleDateString();
       }
 
+      function getExt(name) {
+        if (!name) return "";
+        const i = name.lastIndexOf(".");
+        return i >= 0 ? name.slice(i).toLowerCase() : "";
+      }
+
       function kindFromMime(mime, name) {
+        const ext = getExt(name);
         if (mime) {
           if (mime.startsWith("image/")) return "img";
           if (mime === "application/pdf") return "pdf";
-          if (
-            mime.includes("word") ||
-            mime.includes("text") ||
-            mime.includes("document")
-          )
-            return "doc";
+          if (mime.startsWith("video/")) return "vid";
+          if (mime.startsWith("audio/")) return "audio";
           if (
             mime.includes("sheet") ||
             mime.includes("excel") ||
-            mime.includes("csv")
+            mime.includes("csv") ||
+            mime === "text/csv"
           )
             return "sheet";
-          if (mime.startsWith("video/")) return "vid";
-          if (mime.includes("zip") || mime.includes("compressed")) return "zip";
+          if (
+            mime.includes("zip") ||
+            mime.includes("compressed") ||
+            mime.includes("tar") ||
+            mime.includes("gzip") ||
+            mime.includes("rar") ||
+            mime.includes("7z")
+          )
+            return "zip";
+          if (
+            mime.includes("word") ||
+            mime.includes("document") ||
+            mime.includes("msword") ||
+            mime.includes("presentation") ||
+            mime.includes("powerpoint")
+          )
+            return "doc";
         }
-        if (name) {
-          const e = name.split(".").pop().toLowerCase();
-          if (/png|jpe?g|gif|webp|svg/.test(e)) return "img";
-          if (/pdf/.test(e)) return "pdf";
-          if (/docx?|txt|md/.test(e)) return "doc";
-          if (/xlsx?|csv/.test(e)) return "sheet";
-          if (/mp4|mov|webm/.test(e)) return "vid";
-          if (/zip|rar|7z/.test(e)) return "zip";
+        if (ext) {
+          if (/^\.(png|jpe?g|gif|webp|svg)$/.test(ext)) return "img";
+          if (ext === ".pdf") return "pdf";
+          if (/^\.(mp4|webm|ogg|mov)$/.test(ext)) return "vid";
+          if (/^\.(mp3|wav|ogg|m4a|aac|flac)$/.test(ext)) return "audio";
+          if (/^\.(xlsx?|csv)$/.test(ext)) return "sheet";
+          if (/^\.(zip|rar|7z|tar|gz|bz2)$/.test(ext)) return "zip";
+          if (TEXT_EXTS.has(ext)) return "code";
+          if (/^\.(docx?|pptx?|odt|rtf)$/.test(ext)) return "doc";
         }
         return "file";
+      }
+
+      function isTextPreviewable(f) {
+        if (f.t === "code") return true;
+        const ext = getExt(f.displayName || f.name);
+        if (TEXT_EXTS.has(ext)) return true;
+        const mime = (f.mimeType || "").toLowerCase();
+        return (
+          mime.startsWith("text/") ||
+          mime.includes("json") ||
+          mime.includes("xml") ||
+          mime.includes("javascript") ||
+          mime.includes("typescript")
+        );
       }
 
       function esc(t) {
@@ -912,25 +1549,16 @@
           applyProfile();
         } catch (err) {
           console.error("Profile load failed:", err);
-          // Optional: redirect to login if unauthorized
-          // window.location.href = "/login";
         }
       }
 
       function applyProfile() {
         const p = S.profile;
         if (!p) return;
-
-        // Avatar initials
-        const initials = getInitials(p.firstName, p.lastName);
-        $("#avt").textContent = initials;
-
-        // Account menu
+        $("#avt").textContent = getInitials(p.firstName, p.lastName);
         $("#accName").textContent =
           [p.firstName, p.lastName].filter(Boolean).join(" ") || "User";
         $("#accEmail").textContent = p.email || "";
-
-        // Storage meter (dynamic)
         updateStorageMeter();
       }
 
@@ -942,23 +1570,18 @@
           $("#sbar").style.width = "2%";
           return;
         }
-
         const used = Number(p.storageUsed) || 0;
         const limit = Number(p.storageLimit) || 1;
-
         $("#su").textContent = fmtSize(used);
         $("#slimit").textContent = "of " + fmtSize(limit) + " used";
-
         const pct = Math.min(100, (used / limit) * 100);
         $("#sbar").style.width = Math.max(2, pct) + "%";
       }
 
       function toggleAccountMenu() {
-        const menu = $("#accountMenu");
-        menu.classList.toggle("open");
+        $("#accountMenu").classList.toggle("open");
       }
 
-      // Close account menu when clicking outside
       document.addEventListener("click", (e) => {
         const menu = $("#accountMenu");
         const avt = $("#avt");
@@ -975,10 +1598,9 @@
         try {
           await api("/user/logout", { method: "POST" });
         } catch (err) {
-          // still redirect even if request fails
           console.error(err);
         }
-        window.location.href = "/login"; // change if your login route is different
+        window.location.href = "/login";
       }
 
       // ---------- Data ----------
@@ -1007,7 +1629,6 @@
         return S.trashedFiles;
       }
 
-      // Supports folderId = null (root files)
       async function loadFiles(folderId) {
         const query =
           folderId != null
@@ -1060,35 +1681,41 @@
         S.path = [];
         $$(".nav").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
         $("#side").classList.remove("open");
+        savePrefs();
         refresh();
       }
 
       function openFolder(id) {
         if (S.view === "trash") return;
-        if (S.drag) return; // ignore click while dragging
+        if (S.drag) return;
         S.folderId = id;
         S.path = buildPath(id);
         S.view = "drive";
         $$(".nav").forEach((b) =>
           b.classList.toggle("on", b.dataset.v === "drive"),
         );
+        savePrefs();
         refresh();
       }
 
       function toggleView() {
         S.grid = !S.grid;
         $("#vt").textContent = S.grid ? "▦" : "☰";
+        savePrefs();
         render();
       }
 
       function toggleTheme() {
         const r = document.documentElement;
         const isDark =
-          getComputedStyle(r).getPropertyValue("--bg").trim() === "#12121c";
+          r.dataset.theme === "dark" ||
+          (!r.dataset.theme &&
+            getComputedStyle(r).getPropertyValue("--bg").trim() === "#0f0f17");
         r.dataset.theme = isDark ? "light" : "dark";
+        savePrefs();
       }
 
-      // ---------- Drag & Drop (move) ----------
+      // ---------- Drag & Drop ----------
       function onDragStart(e, type, id) {
         if (S.view === "trash") {
           e.preventDefault();
@@ -1096,7 +1723,7 @@
         }
         S.drag = { type, id };
         e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", id); // required for Firefox
+        e.dataTransfer.setData("text/plain", id);
         e.currentTarget.classList.add("dragging");
       }
 
@@ -1130,16 +1757,12 @@
         e.stopPropagation();
         e.currentTarget.classList.remove("drop-target");
         if (!S.drag) return;
-
         const { type, id } = S.drag;
         S.drag = null;
-
-        // Cannot drop onto itself
         if (type === "folder" && id === targetFolderId) {
           toast("Cannot move a folder into itself");
           return;
         }
-
         try {
           if (type === "folder") {
             await api("/folder/" + encodeURIComponent(id), {
@@ -1166,16 +1789,17 @@
         }
       }
 
-      // Root (My Drive)
       function onDragOverRoot(e) {
         if (!S.drag) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         e.currentTarget.classList.add("drop-target");
       }
+
       function onDragLeaveRoot(e) {
         e.currentTarget.classList.remove("drop-target");
       }
+
       async function onDropOnRoot(e) {
         e.preventDefault();
         e.currentTarget.classList.remove("drop-target");
@@ -1283,7 +1907,6 @@
         const ct = $("#ct");
         let html = "";
 
-        // Breadcrumb (only in drive) – every level is a drop target
         if (S.view === "drive") {
           html += `<div class="crumb">
           <a class="drop-root"
@@ -1309,7 +1932,6 @@
 
         const titles = {
           drive: S.folderId ? "Files in folder" : "My Drive",
-          recent: "Recent",
           trash: "Trash",
         };
         html += `<h3>${titles[S.view] || "Files"}
@@ -1323,8 +1945,6 @@
         if (S.view === "drive") {
           folders = getCurrentFolders();
           files = S.files.filter((f) => !f.isTrashed);
-        } else if (S.view === "recent") {
-          files = S.files.filter((f) => !f.isTrashed).slice(0, 40);
         } else if (S.view === "trash") {
           folders = S.trashedFolders || [];
           files = S.trashedFiles || [];
@@ -1352,7 +1972,7 @@
           <div class="empty">
             <div class="big">${S.view === "trash" ? "🗑" : "📂"}</div>
             <p>${S.view === "trash" ? "Trash is empty." : "Nothing here yet."}</p>
-            ${S.view !== "trash" ? `<p style="margin-top:8px">Drop files anywhere or click <b>＋ New</b></p>` : ""}
+            ${S.view !== "trash" ? `<p style="margin-top:10px;opacity:.85">Drop files anywhere or click <b>＋ New</b></p>` : ""}
           </div>
           ${S.view !== "trash" ? `<div class="drop-hint">Drag & drop files here to upload<br><small style="opacity:.7">You can also drag folders/files onto other folders or breadcrumb items to move them</small></div>` : ""}`;
         } else {
@@ -1368,7 +1988,6 @@
         }
 
         ct.innerHTML = html;
-        // Storage is now driven by profile, not by summing files
       }
 
       // ---------- Actions ----------
@@ -1378,7 +1997,7 @@
         try {
           if (S.view === "trash") {
             await Promise.all([loadTrashedFolders(), loadTrashedFiles()]);
-            S.files = []; // keep normal files empty in trash view
+            S.files = [];
           } else {
             await loadFolders();
             await loadFiles(S.folderId);
@@ -1461,43 +2080,27 @@
 
       function showRenameFile(id) {
         const file = S.files.find((f) => f.id === id);
-
-        if (!file) {
-          return toast("File not found");
-        }
-
+        if (!file) return toast("File not found");
         const currentName = file.displayName || file.name || "";
-
         $("#md").innerHTML = `
           <div class="modal" onclick="if(event.target===this)closeModal()">
             <div class="mb">
               <h2>Rename file</h2>
-
               <div class="fld">
                 <label>File name</label>
-                <input
-                  id="mi"
-                  value="${esc(currentName)}"
-                  placeholder="Enter new file name"
-                  autofocus
-                >
+                <input id="mi" value="${esc(currentName)}" placeholder="Enter new file name" autofocus>
               </div>
-
               <div class="row">
                 <button class="ghost" onclick="closeModal()">Cancel</button>
                 <button class="pri" onclick="renameFile('${id}')">Save</button>
               </div>
             </div>
-          </div>
-        `;
-
+          </div>`;
         setTimeout(() => {
           const i = $("#mi");
-
           if (i) {
             i.focus();
             i.select();
-
             i.onkeydown = (e) => {
               if (e.key === "Enter") renameFile(id);
             };
@@ -1550,27 +2153,17 @@
       async function renameFile(id) {
         const file = S.files.find((f) => f.id === id);
         if (!file) return toast("File not found");
-
         let name = ($("#mi")?.value || "").trim();
-
-        if (!name) {
-          return toast("Enter a file name");
-        }
-
-        // Preserve the original extension
+        if (!name) return toast("Enter a file name");
         const oldName = file.displayName || file.name || "";
         const lastDot = oldName.lastIndexOf(".");
-
         const extension = lastDot > 0 ? oldName.substring(lastDot) : "";
-
-        // Add extension if the user didn't provide one
         if (
           extension &&
           !name.toLowerCase().endsWith(extension.toLowerCase())
         ) {
           name += extension;
         }
-
         try {
           await api("/file/" + encodeURIComponent(id), {
             method: "PATCH",
@@ -1579,10 +2172,8 @@
               name,
             }),
           });
-
           closeModal();
           toast("File renamed successfully");
-
           await refresh();
         } catch (err) {
           toast(err.message || "Could not rename file");
@@ -1611,6 +2202,7 @@
             method: "DELETE",
           });
           toast("File moved to trash");
+          await loadProfile(); // refresh storage
           await refresh();
         } catch (err) {
           toast(err.message || "Could not move file to trash");
@@ -1621,9 +2213,7 @@
         try {
           await api("/folder/" + encodeURIComponent(id), {
             method: "PATCH",
-            body: JSON.stringify({
-              operation: "restore",
-            }),
+            body: JSON.stringify({ operation: "restore" }),
           });
           toast("Folder restored");
           await refresh();
@@ -1640,6 +2230,7 @@
             method: "DELETE",
           });
           toast("Folder permanently deleted");
+          await loadProfile();
           await refresh();
         } catch (err) {
           toast(err.message || "Could not delete folder");
@@ -1648,17 +2239,14 @@
 
       async function handleUpload(fileList) {
         if (!fileList?.length) return;
-        // Allow upload at root as well
         const form = new FormData();
         [...fileList].forEach((f) => form.append("files", f));
         if (S.folderId) form.append("folderId", S.folderId);
-
         try {
           toast("Uploading…");
           await api("/file/upload", { method: "POST", body: form });
           toast(fileList.length + " file(s) uploaded");
           await loadFiles(S.folderId);
-          // Refresh profile so storageUsed updates
           await loadProfile();
           render();
         } catch (err) {
@@ -1668,7 +2256,9 @@
       }
 
       function downloadFile(id) {
-        const f = S.files.find((x) => x.id === id);
+        const f =
+          S.files.find((x) => x.id === id) ||
+          (S.trashedFiles || []).find((x) => x.id === id);
         if (!f?.url) return toast("No download URL");
         const a = document.createElement("a");
         a.href = f.url;
@@ -1685,11 +2275,10 @@
         try {
           await api("/file/" + encodeURIComponent(id), {
             method: "PATCH",
-            body: JSON.stringify({
-              operation: "restore",
-            }),
+            body: JSON.stringify({ operation: "restore" }),
           });
           toast("File restored");
+          await loadProfile();
           await refresh();
         } catch (err) {
           toast(err.message || "Could not restore file");
@@ -1704,14 +2293,14 @@
             method: "DELETE",
           });
           toast("File permanently deleted");
-          await loadProfile(); // update storage after permanent delete
+          await loadProfile(); // critical: update storage after permanent delete
           await refresh();
         } catch (err) {
           toast(err.message || "Could not delete file");
         }
       }
 
-      // ---------- Preview ----------
+      // ---------- Preview (full type support) ----------
       function loadSheetJS() {
         return new Promise((resolve, reject) => {
           if (window.XLSX) return resolve(window.XLSX);
@@ -1780,10 +2369,9 @@
       }
 
       async function previewSheet(f, container) {
-        container.innerHTML = `<div style="color:#fff;text-align:center"><div class="spinner" style="border-top-color:#fff;margin:0 auto 12px"></div>Loading spreadsheet…</div>`;
+        container.innerHTML = `<div style="color:var(--preview-ink);text-align:center"><div class="spinner" style="margin:0 auto 12px"></div>Loading spreadsheet…</div>`;
         try {
           if (!f.url) throw new Error("No file URL available");
-
           const name = (f.displayName || f.name || "").toLowerCase();
           const isCSV =
             name.endsWith(".csv") || (f.mimeType && f.mimeType.includes("csv"));
@@ -1811,15 +2399,52 @@
           const rows = XLSX.utils
             .sheet_to_json(ws, { header: 1, defval: "" })
             .slice(0, 201);
-          const meta = `Sheet: ${sheetName}${wb.SheetNames.length > 1 ? ` (${wb.SheetNames.length} sheets)` : ""} · showing first ${Math.min(rows.length, 200)} rows`;
+          const meta = `Sheet: ${sheetName}${
+            wb.SheetNames.length > 1 ? ` (${wb.SheetNames.length} sheets)` : ""
+          } · showing first ${Math.min(rows.length, 200)} rows`;
           container.innerHTML = renderSheetTable(rows, meta);
         } catch (err) {
           console.error(err);
           container.innerHTML = `
-          <div style="text-align:center;color:#fff">
-            <div style="font-size:64px;margin-bottom:16px">${ICON.sheet}</div>
+          <div class="preview-fallback">
+            <div class="icon">${ICON.sheet}</div>
             <b>${esc(f.displayName)}</b>
-            <p style="color:#aab0d0;margin-top:8px">Could not preview this spreadsheet.<br>${esc(err.message || "Unknown error")}</p>
+            <p>Could not preview this spreadsheet.<br>${esc(err.message || "Unknown error")}</p>
+            <button class="pri" style="margin-top:20px" onclick="downloadFile('${f.id}')">⬇ Download</button>
+          </div>`;
+        }
+      }
+
+      async function previewText(f, container) {
+        container.innerHTML = `<div style="color:var(--preview-ink);text-align:center"><div class="spinner" style="margin:0 auto 12px"></div>Loading…</div>`;
+        try {
+          if (!f.url) throw new Error("No file URL available");
+          const res = await fetch(f.url);
+          if (!res.ok) throw new Error("Failed to fetch file");
+          let text = await res.text();
+          // Cap very large files for UI safety
+          const maxChars = 400000;
+          let truncated = false;
+          if (text.length > maxChars) {
+            text = text.slice(0, maxChars);
+            truncated = true;
+          }
+          const ext = getExt(f.displayName || f.name) || "text";
+          container.innerHTML = `
+            <div class="code-viewer">
+              <div class="code-meta">
+                <span>${esc(ext)} · ${fmtSize(f.size)}${truncated ? " · preview truncated" : ""}</span>
+                <span>${esc(f.displayName)}</span>
+              </div>
+              <pre class="code-body">${esc(text)}</pre>
+            </div>`;
+        } catch (err) {
+          console.error(err);
+          container.innerHTML = `
+          <div class="preview-fallback">
+            <div class="icon">${ICON.code}</div>
+            <b>${esc(f.displayName)}</b>
+            <p>Could not load this file for preview.<br>${esc(err.message || "Unknown error")}</p>
             <button class="pri" style="margin-top:20px" onclick="downloadFile('${f.id}')">⬇ Download</button>
           </div>`;
         }
@@ -1830,45 +2455,59 @@
         if (!f) return;
 
         let body = "";
-        let asyncSheet = false;
+        let asyncHandler = null;
 
         if (f.t === "img" && f.url) {
-          body = `<img src="${f.url}" class="pvimg" alt="">`;
+          body = `<img src="${f.url}" class="pvimg" alt="${esc(f.displayName)}">`;
         } else if (f.t === "pdf" && f.url) {
-          body = `<iframe src="${f.url}" class="pvfr"></iframe>`;
+          body = `<iframe src="${f.url}" class="pvfr" title="PDF preview"></iframe>`;
         } else if (f.t === "vid" && f.url) {
-          body = `<video src="${f.url}" controls class="pvimg" style="max-height:80vh"></video>`;
+          body = `
+            <div class="media-wrap">
+              <video src="${f.url}" controls autoplay playsinline></video>
+            </div>`;
+        } else if (f.t === "audio" && f.url) {
+          body = `
+            <div class="media-wrap">
+              <div style="font-size:64px;margin-bottom:8px">${ICON.audio}</div>
+              <b style="color:var(--preview-ink)">${esc(f.displayName)}</b>
+              <audio src="${f.url}" controls autoplay style="margin-top:16px"></audio>
+            </div>`;
         } else if (f.t === "sheet" && f.url) {
           body = `<div id="sheet-preview" style="width:100%;height:100%;display:grid;place-items:center"></div>`;
-          asyncSheet = true;
+          asyncHandler = (container) => previewSheet(f, container);
+        } else if (isTextPreviewable(f) && f.url) {
+          body = `<div id="text-preview" style="width:100%;height:100%;display:grid;place-items:center"></div>`;
+          asyncHandler = (container) => previewText(f, container);
         } else {
           body = `
-          <div style="text-align:center;color:#fff">
-            <div style="font-size:64px;margin-bottom:16px">${ICON[f.t] || ICON.file}</div>
-            <b>${esc(f.displayName)}</b>
-            <p style="color:#aab0d0;margin-top:8px">No in-browser preview for this type.<br>Download to open.</p>
-            <button class="pri" style="margin-top:20px" onclick="downloadFile('${f.id}')">⬇ Download</button>
-          </div>`;
+            <div class="preview-fallback">
+              <div class="icon">${ICON[f.t] || ICON.file}</div>
+              <b>${esc(f.displayName)}</b>
+              <p>No in-browser preview available for this file type.<br>Download to open it on your device.</p>
+              <button class="pri" style="margin-top:20px" onclick="downloadFile('${f.id}')">⬇ Download</button>
+            </div>`;
         }
 
         $("#pv").innerHTML = `
         <div class="pv">
           <div class="pvh">
-            <button class="ib" onclick="closePreview()">✕</button>
+            <button class="ib" onclick="closePreview()" title="Close">✕</button>
             <span style="font-size:22px">${ICON[f.t] || ICON.file}</span>
-            <div style="min-width:0">
-              <b>${esc(f.displayName)}</b>
+            <div style="min-width:0;flex:1">
+              <b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(f.displayName)}</b>
               <div class="fm">${fmtSize(f.size)} · ${timeAgo(f.createdAt)}</div>
             </div>
-            <span style="flex:1"></span>
             <button class="btn2" onclick="downloadFile('${f.id}')">⬇ Download</button>
           </div>
           <div class="pvb">${body}</div>
         </div>`;
 
-        if (asyncSheet) {
-          const container = document.getElementById("sheet-preview");
-          if (container) previewSheet(f, container);
+        if (asyncHandler) {
+          const container =
+            document.getElementById("sheet-preview") ||
+            document.getElementById("text-preview");
+          if (container) asyncHandler(container);
         }
       }
 
@@ -1876,7 +2515,146 @@
         $("#pv").innerHTML = "";
       }
 
-      // ---------- Drag & drop (upload) ----------
+      // ---------- Pricing ----------
+      function openPricing() {
+        renderPricing();
+      }
+
+      function closePricing() {
+        $("#pricing").innerHTML = "";
+      }
+
+      function setBilling(period) {
+        S.billing = period;
+        renderPricing();
+      }
+
+      function selectPlan(planId) {
+        toast(
+          planId === "free"
+            ? "You’re already on the Free plan"
+            : `Redirecting to checkout for ${planId} (${S.billing})…`,
+        );
+        if (planId !== "free") {
+          setTimeout(() => toast("Checkout opened (demo)"), 600);
+        }
+      }
+
+      function renderPricing() {
+        const isYearly = S.billing === "yearly";
+        const plans = [
+          {
+            id: "free",
+            name: "Free",
+            monthly: 0,
+            yearly: 0,
+            current: true,
+            features: [
+              "15 GB storage",
+              "Basic file sharing",
+              "Web & mobile access",
+              "30-day trash recovery",
+              "Community support",
+            ],
+          },
+          {
+            id: "pro",
+            name: "Pro",
+            monthly: 9.99,
+            yearly: 7.99,
+            featured: true,
+            features: [
+              "2 TB storage",
+              "Advanced sharing & links",
+              "Priority support",
+              "Version history (30 days)",
+              "Offline access",
+              "Password-protected links",
+            ],
+          },
+          {
+            id: "business",
+            name: "Business",
+            monthly: 19.99,
+            yearly: 15.99,
+            features: [
+              "5 TB storage per user",
+              "Team folders & admin controls",
+              "Unlimited version history",
+              "Advanced security & audit logs",
+              "SSO & SCIM (coming soon)",
+              "Dedicated success manager",
+            ],
+          },
+        ];
+
+        let cards = "";
+        plans.forEach((p) => {
+          const price = isYearly ? p.yearly : p.monthly;
+          const priceNote =
+            p.monthly === 0
+              ? "Forever free"
+              : isYearly
+                ? `$${(p.yearly * 12).toFixed(0)} billed yearly`
+                : "Billed monthly";
+          const ctaClass = p.current
+            ? "current"
+            : p.featured
+              ? "primary"
+              : "secondary";
+          const ctaLabel = p.current
+            ? "Current plan"
+            : p.featured
+              ? "Upgrade to Pro"
+              : "Get Business";
+
+          cards += `
+            <div class="plan ${p.featured ? "featured" : ""}">
+              ${p.featured ? `<div class="badge">Most popular</div>` : ""}
+              <div class="plan-name">${p.name}</div>
+              <div class="price">
+                $${price === 0 ? "0" : price.toFixed(price % 1 === 0 ? 0 : 2)}
+                <span>${price === 0 ? "" : "/mo"}</span>
+              </div>
+              <div class="price-note">${priceNote}</div>
+              <ul>
+                ${p.features.map((f) => `<li>${f}</li>`).join("")}
+              </ul>
+              <button class="cta ${ctaClass}" onclick="selectPlan('${p.id}')"${
+                p.current ? " disabled" : ""
+              }>
+                ${ctaLabel}
+              </button>
+            </div>`;
+        });
+
+        $("#pricing").innerHTML = `
+          <div class="pricing-overlay">
+            <div class="pricing-header">
+              <h1><i style="width:22px;height:22px;border-radius:7px 7px 7px 2px;background:var(--acc);display:inline-block;vertical-align:middle;margin-right:4px"></i> Cloudiva</h1>
+              <button class="ib" onclick="closePricing()" title="Close">✕</button>
+            </div>
+            <div class="pricing-body">
+              <div class="pricing-intro">
+                <h2>Choose the plan that’s right for you</h2>
+                <p>More space, better collaboration, and advanced controls when you need them.</p>
+                <div class="billing-toggle">
+                  <button class="${!isYearly ? "active" : ""}" onclick="setBilling('monthly')">Monthly</button>
+                  <button class="${isYearly ? "active" : ""}" onclick="setBilling('yearly')">
+                    Yearly <span class="save-badge">Save 20%</span>
+                  </button>
+                </div>
+              </div>
+              <div class="plans">${cards}</div>
+              <div class="pricing-footer">
+                All plans include SSL encryption and 99.9% uptime SLA.<br>
+                Need a custom enterprise plan? <a href="mailto:sales@cloudiva.app">Contact sales</a>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // ---------- Drag & drop upload ----------
       const ct = $("#ct");
       ["dragover", "dragenter"].forEach((ev) => {
         ct.addEventListener(ev, (e) => {
@@ -1902,13 +2680,19 @@
         if (e.key === "Escape") {
           closePreview();
           closeModal();
+          closePricing();
           $("#accountMenu").classList.remove("open");
         }
       });
 
       // ---------- Init ----------
       (async function init() {
-        await loadProfile(); // load user + storage first
+        loadPrefs();
+        $$(".nav").forEach((b) =>
+          b.classList.toggle("on", b.dataset.v === S.view),
+        );
+        $("#vt").textContent = S.grid ? "▦" : "☰";
+        await loadProfile();
         await refresh();
       })();
     </script>

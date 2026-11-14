@@ -1,6 +1,4 @@
 import type { Request, Response } from "express";
-import { responseMessages } from "../helpers/responses.js";
-import z, { success } from "zod";
 import db from "../db/db_init.js";
 import { users } from "../db/schema/users.js";
 import { and, eq, isNull, sum } from "drizzle-orm";
@@ -23,7 +21,7 @@ const profile = async (req: Request, res: Response) => {
       return res.status(401).json({
         success: false,
         status_code: 401,
-        message: responseMessages.user.error.details,
+        message: "Authentication required. Please log in.",
       });
     }
 
@@ -50,7 +48,7 @@ const profile = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.user.error.details,
+        message: "User not found.",
       });
     }
 
@@ -59,14 +57,19 @@ const profile = async (req: Request, res: Response) => {
         totalSize: sum(files.size),
       })
       .from(files)
-      .where(eq(files.ownerId, user.id));
+      .where(
+        and(
+          eq(files.ownerId, user.id),
+          eq(files.isTrashed, false)
+        )
+      );
 
     const storageUsed = Number(storageResult?.totalSize ?? 0);
 
     return res.status(200).json({
       success: true,
       status_code: 200,
-      message: responseMessages.user.success.details,
+      message: "User details fetched successfully.",
       data: {
         ...existingUser,
         storageUsed,
@@ -124,7 +127,7 @@ const deleteProfile = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.user.error.details,
+        message: "Authentication required. Please log in.",
       });
     }
 
@@ -138,7 +141,7 @@ const deleteProfile = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status_code: 404,
-        message: responseMessages.user.error.details,
+        message: "User not found.",
       });
     }
 
