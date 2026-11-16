@@ -1,4 +1,5 @@
 import { bigint, boolean, pgTable, timestamp, uuid, varchar, text } from "drizzle-orm/pg-core";
+import { DEFAULT_STORAGE_SIZE } from "../../helpers/constants.js";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -14,7 +15,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   picture: varchar("picture", { length: 255 }), // URL to the user's profile image
   storageUsed: bigint("storage_used", { mode: "number" }).notNull().default(0),
-  storageLimit: bigint("storage_limit", { mode: "number" }).notNull().default(16106127360), // 15 GB (Free Tier)
+  storageLimit: bigint("storage_limit", { mode: "number" }).notNull().default(DEFAULT_STORAGE_SIZE), // 5 GB (Free Tier)
 
   createdAt: timestamp("created_at", {
     withTimezone: true,

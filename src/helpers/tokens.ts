@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { responseMessages } from "./responses.js";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY, RESET_TOKEN_EXPIRY } from "./constants.js";
 
 interface UserObject {
@@ -19,7 +18,7 @@ interface UserObject {
 
 const generateAccessToken = (userObject: UserObject) => {
   if (!userObject) {
-    throw new Error(responseMessages.public.error.object);
+    throw new Error("User object is required to generate access token.");
   }
 
   const payload = {
@@ -44,7 +43,7 @@ const generateAccessToken = (userObject: UserObject) => {
 
 const generateRefreshToken = (userObject: UserObject) => {
   if (!userObject) {
-    throw new Error(responseMessages.public.error.object);
+    throw new Error("User object is required to generate refresh token.");
   }
 
   const payload = {
@@ -74,7 +73,19 @@ const resetToken = () => {
 };
 
 const verifyToken = (token: string) => {
-  return jwt.verify(token, process.env.JWT_SECRET_KEY!);
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET_KEY!);
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new Error("Token has expired");
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error("Invalid token");
+    }
+
+    throw error;
+  }
 };
 
 export { generateAccessToken, generateRefreshToken, resetToken, verifyToken };

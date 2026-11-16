@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import { loginPayload, registerPayload } from "../helpers/validator.js";
-import { responseMessages } from "../helpers/responses.js";
 import { googleClient } from "../services/oauth.js";
 import * as z from "zod";
 import db from "../db/db_init.js";
@@ -41,7 +40,7 @@ const register = async (req: Request, res: Response) => {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message: responseMessages.public.error.payload,
+            message: "Missing required fields.",
           });
         }
 
@@ -55,7 +54,7 @@ const register = async (req: Request, res: Response) => {
           return res.status(409).json({
             success: false,
             status_code: 409,
-            message: responseMessages.public.error.register,
+            message: "User already exists.",
           });
         }
 
@@ -85,7 +84,7 @@ const register = async (req: Request, res: Response) => {
         res.status(201).json({
           success: true,
           status_code: 201,
-          message: responseMessages.public.success.register,
+          message: "Account has been created successfully.",
           data: newUser,
         });
         break;
@@ -96,7 +95,7 @@ const register = async (req: Request, res: Response) => {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message: responseMessages.public.error.token,
+            message: "Missing provider token.",
           });
         }
 
@@ -116,7 +115,7 @@ const register = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.credentials,
+            message: "Invalid credentials.",
           });
         }
 
@@ -139,7 +138,7 @@ const register = async (req: Request, res: Response) => {
           return res.status(409).json({
             success: false,
             status_code: 409,
-            message: responseMessages.public.error.register,
+            message: "User already exists.",
           });
         }
 
@@ -169,7 +168,7 @@ const register = async (req: Request, res: Response) => {
         res.status(201).json({
           success: true,
           status_code: 201,
-          message: responseMessages.public.success.register,
+          message: "Account has been created successfully.",
           data: newUser,
         });
         break;
@@ -182,7 +181,7 @@ const register = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.public.error.register,
+          error.issues[0]?.message ?? "Invalid registration payload.",
       });
     }
 
@@ -199,7 +198,7 @@ const login = async (req: Request, res: Response) => {
         status_code: 400,
         message:
           result.error.issues[0]?.message ??
-          responseMessages.public.error.login,
+          "Invalid login payload.",
       });
     }
 
@@ -211,7 +210,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message: responseMessages.public.error.payload,
+            message: "Missing required fields.",
           });
         }
 
@@ -225,7 +224,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.credentials,
+            message: "Account not found.",
           });
         }
 
@@ -233,7 +232,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.credentials,
+            message: "Account not found.",
           });
         }
 
@@ -245,7 +244,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.credentials,
+            message: "Password is incorrect.",
           });
         }
 
@@ -273,7 +272,7 @@ const login = async (req: Request, res: Response) => {
         return res.status(200).json({
           success: true,
           status_code: 200,
-          message: responseMessages.public.success.login,
+          message: "Logged in successfully.",
           data: safeUser,
           accessToken,
           refreshToken,
@@ -284,7 +283,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(400).json({
             success: false,
             status_code: 400,
-            message: responseMessages.public.error.token,
+            message: "Missing provider token.",
           });
         }
 
@@ -304,7 +303,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.credentials,
+            message: "Invalid credentials.",
           });
         }
 
@@ -320,7 +319,7 @@ const login = async (req: Request, res: Response) => {
           return res.status(401).json({
             success: false,
             status_code: 401,
-            message: responseMessages.public.error.user,
+            message: "Account not found.",
           });
         }
 
@@ -346,7 +345,7 @@ const login = async (req: Request, res: Response) => {
         return res.status(200).json({
           success: true,
           status_code: 200,
-          message: responseMessages.public.success.login,
+          message: "Logged in successfully.",
           data: existingGoogleUser,
           accessToken,
           refreshToken,
@@ -361,7 +360,7 @@ const login = async (req: Request, res: Response) => {
         success: false,
         status_code: 400,
         message:
-          error.issues[0]?.message ?? responseMessages.public.error.login,
+          error.issues[0]?.message ?? "Invalid login payload.",
       });
     }
 

@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import { responseMessages } from "../helpers/responses.js";
 import { verifyToken } from "../helpers/tokens.js";
 
 export const authMiddleware = (
@@ -22,7 +21,7 @@ export const authMiddleware = (
 
       return res.status(401).json({
         success: false,
-        message: responseMessages.middlewares.error.access,
+        message: "Authentication token is missing.",
       });
     }
 
@@ -33,7 +32,7 @@ export const authMiddleware = (
       }
       return res.status(401).json({
         success: false,
-        message: responseMessages.middlewares.error.auth,
+        message: "Authentication token is invalid or expired.",
       });
     }
 
@@ -46,7 +45,7 @@ export const authMiddleware = (
     }
     return res.status(403).json({
       success: false,
-      message: responseMessages.middlewares.error.token,
+      message: "Authentication failed. Please log in again.",
     });
   }
 };
