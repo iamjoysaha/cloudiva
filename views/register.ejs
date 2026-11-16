@@ -698,7 +698,7 @@
       }
 
       async function postRegister(payload) {
-        const apiResponse = await fetch("http://localhost:3000/register", {
+        const apiResponse = await fetch("<%= apiUrl %>/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

@@ -649,7 +649,7 @@
       }
 
       async function postLogin(payload) {
-        const apiResponse = await fetch("http://localhost:3000/login", {
+        const apiResponse = await fetch("<%= apiUrl %>/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
